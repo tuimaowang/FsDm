@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>FsChazhaoZhuangtai 结构说明</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:28px 36px;max-width:1000px}
+h1{font-size:26px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}
+table{border-collapse:collapse;width:100%;margin:12px 0}
+th,td{border:1px solid #d6e0e4;padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eaf2f2}
+</style>
+</head>
+<body>
+<p>FsDm 帮助 &gt; 结构体 &gt; FsChazhaoZhuangtai</p>
+<h1>FsChazhaoZhuangtai</h1>
+<p><code>FsChazhaoZhuangtai</code> 是 <code>GetFindStatus</code> 通过参数返回的查找状态结构，用于读取当前调用线程最近一次查找诊断及查找资源累计统计。结构大小为 80 字节。</p>
+<table>
+<tr><th>字段</th><th>含义</th></tr>
+<tr><td><code>size</code>、<code>version</code></td><td>结构字节数与布局版本。</td></tr>
+<tr><td><code>backend</code></td><td>查找执行后端：0=CPU，1=GPU；不是 dx/obs/wgc 采集方式。</td></tr>
+<tr><td><code>reserved</code></td><td>保留字段，置零。</td></tr>
+<tr><td><code>result</code>、<code>detail</code></td><td>当前线程最近一次查找的状态和底层补充诊断值；正常未命中时 <code>result</code> 仍可为成功。</td></tr>
+<tr><td><code>deviceSerial</code></td><td>当前使用的处理设备编号；0 表示尚未取得。</td></tr>
+<tr><td><code>devicesCreated</code>、<code>shaderBuilds</code>、<code>resourceBuilds</code>、<code>templateUploads</code></td><td>共享设备、着色器、GPU 资源和模板累计创建或上传次数。</td></tr>
+<tr><td><code>frameNumber</code>、<code>bindingVersion</code></td><td>本线程最近查找所使用的帧编号及绑定版本。</td></tr>
+<tr><td><code>resultReadbackBytes</code></td><td>最近一次查找从 GPU 读取的结果字节数，不是整帧图像读回量。</td></tr>
+</table>
+<p>相关函数：<a href="Api-GetFindStatus.html#getfindstatus">GetFindStatus</a>。</p>
+</body>
+</html>

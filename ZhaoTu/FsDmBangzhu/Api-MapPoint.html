@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>MapPoint - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="mappoint">MapPoint</h1>
+<p><strong>函数简介：</strong></p>
+<p>在客户区坐标与原始采集画面坐标之间换算。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI MapPoint(double x, double y, double* outX, double* outY, int direction);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>x、y：待换算坐标，允许小数，必须在输入坐标系有效范围内。</li>
+<li>outX、outY：double 输出指针，接收换算结果。</li>
+<li>direction：0 表示客户区到原始画面；1 表示原始画面到客户区。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>0：换算成功。</li>
+<li>其他状态码：参数错误、未绑定、无有效帧等。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+// C++ 调用；工作台不支持 double* 输出参数。
+double imageX{}, imageY{};
+int ret = MapPoint(100.0, 50.0, &amp;imageX, &amp;imageY, 0);
+</code></pre>
+<p><strong>注意：</strong> 按完整画面对应完整客户区比例换算，不推断程序内部视口。不取整，负坐标和越界不接受。</p>
+
+</body></html>

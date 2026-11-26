@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>SetFrameResultCache - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="setframeresultcache">SetFrameResultCache</h1>
+<p><strong>函数简介：</strong></p>
+<p>全局设置是否复用同一采集帧上的识别结果。适用于 OCR、YOLO 及已接入该开关的其他识别入口。默认开启结果复用。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>int WINAPI SetFrameResultCache(int bypass);</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li><code>bypass=0</code>：开启结果复用。仅在绑定版本、帧编号、区域、模型及其他识别参数相符时命中缓存。</li>
+<li><code>bypass=1</code>：绕过结果缓存，每次调用都重新执行相应识别或检测。</li>
+</ul>
+<p><strong>返回值：</strong>设置成功返回 1；参数不是 0 或 1 时返回 0。</p>
+<p><strong>缓存范围：</strong>开关在本进程使用的 <code>ZhaoTu.dll</code> 实例内全局共享。关闭识别结果复用不会关闭共享采集帧像素缓存；同一帧仍可能复用已经读回的像素，不必重新从抓图模块读回。OCR 缓存还要求同一 OCR 入口和识别参数；YOLO 的三个检测入口共享检测结果。结果缓存容量有限，条目淘汰后会重新分析。</p>
+<p><strong>工作台示例：</strong></p>
+<pre><code>SetFrameResultCache(0) // 开启结果复用
+SetFrameResultCache(1) // 强制重新分析</code></pre>
+<p><strong>C++ 示例：</strong></p>
+<pre><code>// 一般保持默认复用；测试每次重新推理时临时绕过缓存。
+if (SetFrameResultCache(1) == 1) {
+    const FsTongyongJieguo* result = OcrEx(0, 0, 800, 600, "", 0.5);
+    // 读取 result 后按接口约定释放。
+    FreeResult(result);
+}
+SetFrameResultCache(0);</code></pre>
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-model">OCR 模型识别工作流</a>及 YOLO 检测说明。</p>
+</body></html>

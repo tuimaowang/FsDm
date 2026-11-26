@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>C++ 动态调用找图接口</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:28px 36px;max-width:980px}
+h1{font-size:26px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}h2{font-size:20px;color:#176a70;margin-top:26px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:14px;overflow:auto;white-space:pre-wrap}code{font-family:Consolas,monospace}
+.note{background:#fff7df;border-left:4px solid #d99a32;padding:10px 14px}
+</style>
+</head>
+<body>
+<p>FsDm 找图帮助 &gt; C++ 调用</p>
+<h1>C++ 动态调用 FindPic</h1>
+<p>业务程序使用与 DLL 配套发布的 <code>FsDmJiekou.h</code>，通过 <code>LoadLibraryW</code> 加载 <code>ZhaoTu.dll</code>，再用 <code>GetProcAddress</code> 获取函数地址。示例中的窗口句柄、查找区域与 DLL 路径必须替换为应用实际值。</p>
+<pre><code>#include "FsDmJiekou.h"
+#include &lt;windows.h&gt;
+#include &lt;cstdint&gt;
+#include &lt;cstdio&gt;
+
+using FindPicFn = decltype(&amp;FindPic);
+using FreeResultFn = decltype(&amp;FreeResult);
+using SetPathFn = decltype(&amp;SetPath);
+
+void SearchPicture(HWND hwnd) {
+    HMODULE dll = LoadLibraryW(L"ZhaoTu.dll");
+    if (dll == nullptr) {
+        std::printf("无法加载 ZhaoTu.dll\n");
+        return;
+    }
+
+    auto bindWindow = reinterpret_cast&lt;decltype(&amp;BindWindow)&gt;(
+        GetProcAddress(dll, "BindWindow"));
+    auto unbindWindow = reinterpret_cast&lt;decltype(&amp;UnBindWindow)&gt;(
+        GetProcAddress(dll, "UnBindWindow"));
+    auto setPath = reinterpret_cast&lt;SetPathFn&gt;(
+        GetProcAddress(dll, "SetPath"));
+    auto findPic = reinterpret_cast&lt;FindPicFn&gt;(
+        GetProcAddress(dll, "FindPic"));
+    auto freeResult = reinterpret_cast&lt;FreeResultFn&gt;(
+        GetProcAddress(dll, "FreeResult"));
+
+    if (!bindWindow || !unbindWindow || !setPath || !findPic || !freeResult) {
+        std::printf("找图接口不完整\n");
+        FreeLibrary(dll);
+        return;
+    }
+
+    // 必须绑定本进程窗口。选择 dx、obs 或 wgc；此处示例使用 wgc。
+    if (!bindWindow(hwnd, "wgc", "normal", "normal", 0)) {
+        std::printf("窗口绑定失败\n");
+        FreeLibrary(dll);
+        return;
+    }
+
+    setPath(R"(C:\Users\Administrator\Documents\DaMo\FsDm)");
+    // 实际程序应先用 GetStatus 确认已获得首帧，再开始找图。
+    const FsTongyongJieguo* result =
+        findPic(0, 0, 1280, 720, "button.bmp", "000000", 0.9, 0);
+
+    if (result == nullptr) {
+        std::printf("结果内存分配失败\n");
+    } else {
+        if (result-&gt;status != FS_CHENGGONG) {
+            std::printf("找图失败 status=%d detail=0x%08x\n",
+                result-&gt;status, static_cast&lt;unsigned int&gt;(result-&gt;detail));
+        } else if (result-&gt;count == 0) {
+            std::printf("正常完成，没有找到模板\n");
+        } else {
+            for (uint32_t i = 0; i &lt; result-&gt;count; ++i) {
+                const FsJieguoXiang&amp; hit = result-&gt;items[i];
+                std::printf("id=%d x=%d y=%d file=%s\n",
+                    hit.id, hit.x, hit.y, hit.file ? hit.file : "");
+            }
+        }
+        // 结果由 ZhaoTu.dll 分配，必须交还同一个 DLL 释放。
+        freeResult(result);
+    }
+
+    unbindWindow();
+    FreeLibrary(dll);
+}</code></pre>
+<h2>使用时注意</h2>
+<ul>
+<li><code>HWND</code> 必须是当前进程创建的有效窗口句柄。切换绑定窗口或参数前先解绑。</li>
+<li>绑定成功可能仍需等待首帧。实际项目请用 <code>GetStatus</code> 检查 <code>result == FS_CHENGGONG</code> 且 <code>hasFrame != 0</code> 后再查找。</li>
+<li>DLL 接口采用 C ABI 和 <code>WINAPI</code> 调用约定；函数指针签名必须与发布头文件一致。</li>
+<li>读取结果完成后先调用 <code>FreeResult</code>，再卸载 DLL。不要自行 <code>delete</code>、<code>free</code> 结果或内部字段。</li>
+<li>示例目录和坐标仅用于演示；路径字符编码为 UTF-8。</li>
+</ul>
+<div class="note">若项目启用静态导入而不是运行时动态调用，应按项目构建设置链接对应导入库，并保证运行时能找到 <code>ZhaoTu.dll</code>。不要同时对同一个函数地址使用两种调用方式。</div>
+</body>
+</html>

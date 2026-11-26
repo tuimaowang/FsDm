@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>FsZhuangtai 结构说明</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:28px 36px;max-width:1000px}
+h1{font-size:26px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:14px;overflow:auto}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+table{border-collapse:collapse;width:100%;margin:12px 0}
+th,td{border:1px solid #d6e0e4;padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eaf2f2}
+</style>
+</head>
+<body>
+<p>FsDm 帮助 &gt; 结构体 &gt; FsZhuangtai</p>
+<h1>FsZhuangtai</h1>
+<p><code>FsZhuangtai</code> 是 <code>GetStatus</code> 通过参数返回的状态结构，用于查询绑定状态、最近采集诊断及最新帧信息。结构大小为 208 字节。</p>
+<pre><code>FsZhuangtai status{};
+status.size = sizeof(status);
+int ret = GetStatus(&amp;status);</code></pre>
+<table>
+<tr><th>字段</th><th>含义</th></tr>
+<tr><td><code>size</code></td><td>调用前填写结构字节数。</td></tr>
+<tr><td><code>version</code></td><td>结构布局版本；当前为 1。</td></tr>
+<tr><td><code>result</code></td><td>当前采集状态，取 <code>FsJieguo</code>。<code>GetStatus</code> 返回 0 只表示查询成功，具体状态看此字段。</td></tr>
+<tr><td><code>detail</code></td><td>原始 HRESULT 或 Win32 错误等补充诊断值。</td></tr>
+<tr><td><code>bound</code></td><td>是否存在有效绑定。</td></tr>
+<tr><td><code>hasFrame</code></td><td>是否缓存画面；是否可读取仍需检查 <code>result</code>。</td></tr>
+<tr><td><code>initializing</code></td><td>底层拦截或采集是否仍在初始化。</td></tr>
+<tr><td><code>inputImplemented</code></td><td>键鼠输入是否已实现，当前为 0。</td></tr>
+<tr><td><code>hwnd</code></td><td>绑定窗口句柄的完整 x64 数值。</td></tr>
+<tr><td><code>bindingVersion</code></td><td>当前绑定版本。</td></tr>
+<tr><td><code>capturedFrames</code>、<code>failedFrames</code></td><td>本次绑定成功发布的快照数、采集失败数；解绑时清零。</td></tr>
+<tr><td><code>ownerThreadId</code></td><td>发起绑定的线程 ID；线程退出后自动解绑。</td></tr>
+<tr><td><code>mode</code></td><td>绑定时保存的模式值 0 或 1。</td></tr>
+<tr><td><code>display</code></td><td>采集显示方式：<code>dx</code>、<code>obs</code> 或 <code>wgc</code>。</td></tr>
+<tr><td><code>mouse</code>、<code>keypad</code></td><td>绑定时保存的鼠标、键盘配置；当前只保存，不执行键鼠操作。</td></tr>
+<tr><td><code>frame</code></td><td>最新成功发布帧的信息；<code>hasFrame=0</code> 时不可视为有效画面。</td></tr>
+</table>
+<p>相关函数：<a href="Api-GetStatus.html#getstatus">GetStatus</a>。</p>
+</body>
+</html>

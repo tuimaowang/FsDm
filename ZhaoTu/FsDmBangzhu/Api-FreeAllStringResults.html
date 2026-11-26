@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>FreeAllStringResults - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="freeallstringresults">FreeAllStringResults</h1>
+<p><strong>函数简介：</strong> 与 <code>FreeAllResults()</code> 等效，释放所有线程中尚未释放的通用识别结果结构体、内部条目数组及文字，以及 <code>MatchPicName</code>、<code>GetOcrError</code> 返回的独立文字数组。虽然名称含 String，本函数并非只释放字符串；两者任选其一，建议使用 <code>FreeAllResults()</code>。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI FreeAllStringResults(void);
+</code></pre>
+<p><strong>参数定义：</strong> 无。</p>
+<p><strong>返回值：</strong> 1 成功；无结果、重复调用也成功；0 失败。</p>
+<p><strong>示例：</strong></p>
+<pre><code>
+FreeAllStringResults()
+</code></pre>
+<p><strong>释放时机：</strong> 全量释放前，须确保所有线程都已停止读取这些结果。释放后，相关结构体、items、text、file、fullText 及独立文字数组指针均失效，不可继续访问；只释放一个通用结果时使用 <code>FreeResult(result)</code>。</p>
+<p>以上释放接口不清理模板、OCR 模型和字库。MatchPicName、GetOcrError 返回独立文字数组，寿命持续到全量释放；不能将它们传给 FreeResult。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#template">FreeAllStringResults 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

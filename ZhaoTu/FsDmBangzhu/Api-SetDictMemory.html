@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>SetDictMemory - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="setdictmemory">SetDictMemory</h1>
+<p><strong>函数简介：</strong></p>
+<p>从当前进程的内存数据加载 TSPlug 未加密文本点阵字库，并将其设为当前字库。该字库供 dict 引擎下的 Ocr、OcrEx 和 FindStr 系列函数使用。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>int WINAPI SetDictMemory(int index, uintptr_t address, int size);</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>index：字库编号，范围 0～99。</li>
+<li>address：当前进程可读内存中，完整字库文本数据的首地址。C++ 使用 <code>reinterpret_cast&lt;uintptr_t&gt;(data)</code> 传入，工作台可传十进制地址。</li>
+<li>size：字库数据字节数，范围为 1 字节～16 MiB。支持 UTF-8（含 BOM）或 GB18030 编码。</li>
+</ul>
+<p><strong>返回值：</strong>1 表示成功加载并选中该编号；0 表示参数、内存地址、字库编码或格式无效。失败时保留该编号之前已加载的字库。</p>
+<p><strong>内存与格式：</strong>函数会先把调用方指定的字节复制到 DLL 自己的内存，再校验和解析字库；成功返回后，调用方可立即释放或修改原缓冲区。地址必须属于当前进程且在调用期间保持可读。仅支持未加密的 TSPlug 十六进制点阵文本，不支持大漠加密字库，也不支持 <code>SetOcrModelFiles</code> 所使用的神经网络字符表。</p>
+<p><strong>C++ 示例：</strong></p>
+<pre><code>#include &lt;cstdint&gt;
+#include &lt;fstream&gt;
+#include &lt;iterator&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+std::ifstream input("ziku.txt", std::ios::binary);
+std::vector&lt;char&gt; bytes((std::istreambuf_iterator&lt;char&gt;(input)), {});
+if (!bytes.empty()) {
+    // DLL 会复制数据，因此 SetDictMemory 返回后 bytes 可释放。
+    if (SetDictMemory(0, reinterpret_cast&lt;uintptr_t&gt;(bytes.data()),
+                      static_cast&lt;int&gt;(bytes.size())) == 1) {
+        SetOcrEngine("dict");
+        // 之后可调用 OcrEx(...) 或 FindStr*(...)。
+    }
+}</code></pre>
+<p><strong>工作台示例：</strong>先在调用程序中准备好字库缓冲区，再将实际内存地址和字节长度传入，例如 <code>SetDictMemory(0, 12345678, 1200)</code>。不要把示例数字当作真实地址。</p>
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-dict">点阵字库 OCR 与找字工作流</a>。</p>
+</body></html>

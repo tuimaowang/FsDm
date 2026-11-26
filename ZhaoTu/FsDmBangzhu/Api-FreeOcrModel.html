@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>FreeOcrModel - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="freeocrmodel">FreeOcrModel</h1>
+<p><strong>函数简介：</strong></p>
+<p>移除指定模型登记并释放其会话资源。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI FreeOcrModel(int index);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>index：模型编号，0～99。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：清理成功；有效但未登记的编号也可清理。</li>
+<li>0：编号无效等。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+FreeOcrModel(1)
+</code></pre>
+<p><strong>注意：</strong> 正在执行的识别保留引用，可安全完成。清理后使用该编号需重新 SetOcrModel；清理 0 号也不会再次自动登记默认模型。共用 DirectML 设备保持复用。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-model">FreeOcrModel 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>LoadPicByte - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="loadpicbyte">LoadPicByte</h1>
+<p><strong>函数简介：</strong></p>
+<p>从本进程内存加载完整 BMP24 文件数据，并登记为模板别名。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI LoadPicByte(uintptr_t addr, int size, const char* pic_name);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>addr：本进程内完整 BMP24 文件数据首地址，uintptr_t 为指针宽度整数。</li>
+<li>size：文件总字节数，包含 BMP 文件头，不能超过当前模板缓存预算（默认 256 MiB）。</li>
+<li>pic_name：单个虚拟模板名称，不接受列表和通配符。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：复制并解码成功。</li>
+<li>0：地址不可读、内容或大小无效、容量不足等。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+LoadPicByte(0x实际BMP内存地址, 实际文件字节数, &quot;memory.bmp&quot;)
+</code></pre>
+<p><strong>注意：</strong> 不能传裸 BGRA 像素或其他进程的地址。成功后原内存可立即释放；同名成功加载会替换旧模板，失败保留旧内容。上例占位参数必须替换为宿主进程提供的实际值。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#template">LoadPicByte 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

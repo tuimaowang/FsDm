@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>FreePic - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="freepic">FreePic</h1>
+<p><strong>函数简介：</strong></p>
+<p>释放对应 CPU 模板及 GPU 模板缓存。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI FreePic(const char* pic_name);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>pic_name：模板名称，支持 | 列表及文件名通配符，可匹配内存别名和已删除文件的缓存。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：释放完成；合法名称没有对应缓存时也返回 1。</li>
+<li>0：参数无效或释放失败。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+FreePic(&quot;test.bmp|memory.bmp&quot;)
+</code></pre>
+<p><strong>注意：</strong> 不删除磁盘文件。正在查找的旧模板在该次使用结束后释放；普通文件下次 FindPic 会自动加载，内存别名必须重新 LoadPicByte。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#template">FreePic 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

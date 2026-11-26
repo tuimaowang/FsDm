@@ -1,0 +1,83 @@
+FsDm 工作台测试命令
+命令后 // 为说明，输入工作台时只复制 // 前面的内容。
+当前窗口句柄为 0x8912EC；逐行输入，窗口重新打开后需更新句柄。test.bmp 使用现有的 24 位 BMP，不覆盖。
+区域按上次客户区 834×419 编写，实际尺寸不同时统一修改；完整流程见 QuanHanshuCeshi.md。
+采集方式由 BindWindow 第二个参数选择，不再输入 SetCaptureBackend；当前支持 dx/obs/wgc。
+统一结果：status=0/count>0 找到，status=0/count=0 无命中；status=9 是加载失败，不是没找到。
+工作台显示后自动释放本次结果，外部程序读取结构体后使用 FreeResult 释放。
+
+【重新加载 DLL 后先测试默认 DX 采集、GPU 找图】
+log 0
+SetPath("C:\Users\Administrator\Documents\DaMo\FsDm")
+UnBindWindow()
+BindWindow(0x8912EC, "dx", "normal", "normal", 0)
+status
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 等 GPU已缓存后执行；默认使用 GPU 找图。
+
+【WGC 采集】
+log 0
+UnBindWindow()
+BindWindow(0x8912EC, "wgc", "normal", "normal", 0)
+status
+
+【CPU 找图：首遍后再执行一次 FindPic，比较耗时】
+SetFindBackend("cpu")
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找第一处；status=0/count=1 表示找到；count=0 无命中，非零 status 为错误。
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 重复查找，对比缓存复用后的耗时。
+FindPicS(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找第一处，显示一个 id、x、y、file 条目。
+FindPicEx(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找所有匹配，逐项显示全部 id、x、y、file。
+FindPicExS(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找所有匹配，逐项显示全部 id、x、y、file。
+
+【GPU 找图：首遍后再执行一次 FindPic，比较耗时】
+SetFindBackend("gpu")
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找第一处；status=0/count=1 表示找到；count=0 无命中，非零 status 为错误。
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 重复查找，对比缓存复用后的耗时。
+FindPicS(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找第一处，显示一个 id、x、y、file 条目。
+FindPicEx(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找所有匹配，逐项显示全部 id、x、y、file。
+FindPicExS(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找所有匹配，逐项显示全部 id、x、y、file。
+status
+
+【OBS 采集：绑定后等 status 显示 GPU已缓存，再找图】
+UnBindWindow()
+BindWindow(0x8912EC, "obs", "normal", "normal", 0)
+status
+SetFindBackend("cpu")
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找第一处；status=0/count=1 表示找到；count=0 无命中，非零 status 为错误。
+SetFindBackend("gpu")
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找第一处；status=0/count=1 表示找到；count=0 无命中，非零 status 为错误。
+
+【DX 采集：绑定后等 status 显示 GPU已缓存，再找图】
+UnBindWindow()
+BindWindow(0x8912EC, "dx", "normal", "normal", 0)
+status
+SetFindBackend("cpu")
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找第一处；status=0/count=1 表示找到；count=0 无命中，非零 status 为错误。
+SetFindBackend("gpu")
+FindPic(0, 0, 834, 419, "C:\Users\Administrator\Documents\DaMo\FsDm\test.bmp", "000000", 0.9, 0) // 查找第一处；status=0/count=1 表示找到；count=0 无命中，非零 status 为错误。
+
+【模板预加载：保持上面的 DX 绑定；找图前等到 GPU已缓存】
+SetPath("C:\Users\Administrator\Documents\DaMo\FsDm")
+LoadPic("test.bmp") // 预加载，1 成功；后续直接使用内存模板。
+FindPic(0, 0, 834, 419, "test.bmp", "000000", 0.9, 0) // 绑定后执行；count=1 找到，count=0 无命中，非零 status 为错误。
+FreePic("test.bmp") // 释放模板，1 成功；下次找图会从文件重新加载。
+LoadPic("test*.bmp") // 按通配符预加载；1 全部成功，0 有失败，已成功的项保留。
+FreePic("test*.bmp") // 释放当前目录内名称匹配的模板。
+
+LoadPicByte(0x实际BMP首地址, 实际BMP文件字节数, "memory.bmp") // 替换成目标进程内的实际地址和大小后输入；1 成功，原内存随后可释放。
+FindPic(0, 0, 834, 419, "memory.bmp", "000000", 0.9, 0) // 查找内存加载的模板，不需要 memory.bmp 文件。
+FreePic("memory.bmp") // 释放内存模板。
+
+【新增图色接口：保持绑定且已有画面】
+CmpColor(30, 30, "ffffff-202020|000000-000000", 0.9) // status=0 时 count=1 匹配，count=0 不匹配。
+GetScreenData(0, 0, 100, 100) // 返回本线程的 CPU 数据地址；0 失败，每像素为 B、G、R、0 四字节。
+IsDisplayDead(0, 0, 100, 100, 2) // 检查 2 秒；1 一直不变，0 有变化或失败。
+MatchPicName("test*.bmp") // 无需绑定；返回 SetPath 目录内匹配的 BMP 文件名，以 | 分隔。
+
+【释放与结束】
+FreeResult(0) // 仅验证空指针释放成功；工作台已自动释放显示过的真实结果。
+FreeAllResults() // 释放全部识别结果及文字结果，不释放模板或模型。
+SetFindBackend("gpu") // 恢复默认找图找色方式。
+UnBindWindow()
+status // 应显示未绑定、无有效帧。
+
+FindPic：status=0/count=1 找到；status=0/count=0 无命中；非零 status 为错误。找色自行测试。

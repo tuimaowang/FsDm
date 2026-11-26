@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>AiYoloDetectObjectsToDataBmp - FsDm 函数用法</title><style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}
+h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}
+h2{font-size:19px;color:#176a70;margin-top:28px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+table{border-collapse:collapse;width:100%;margin:10px 0}
+th,td{border:1px solid #d6e0e4;padding:7px 10px;text-align:left;vertical-align:top}th{background:#eaf2f2}
+</style></head><body>
+<p><a href="AiJiance.html">YOLO 接口总览</a> · <a href="WanZhengDiaoyong.html#yolo">工作台完整调用</a></p>
+<h1 id="aiyolodetectobjectstodatabmp">AiYoloDetectObjectsToDataBmp</h1>
+<h2>函数简介</h2><p>检测窗口区域，将带检测框标注的完整 BMP 文件字节写入调用方缓冲区。</p>
+<h2>函数原型</h2><pre><code>int WINAPI AiYoloDetectObjectsToDataBmp(int x1, int y1, int x2, int y2, double prob, double iou, void* data, uint32_t* size, int mode);</code></pre>
+<h2>参数定义</h2><table>
+<tr><th>参数</th><th>含义</th></tr>
+<tr><td><code>x1、y1</code></td><td>检测区域左上角，单位为目标窗口客户区物理像素。超出左上边界的部分会裁剪。</td></tr>
+<tr><td><code>x2、y2</code></td><td>检测区域右下角，右边界和下边界不包含。须满足 x2&gt;x1、y2&gt;y1，超出客户区的部分会裁剪，裁剪后区域须非空。</td></tr>
+<tr><td><code>prob</code></td><td>置信度阈值，有限数值 0～1，例如 0.5。置信度由目标存在分数乘以最高类别分数得到，低于阈值的候选框被过滤。提高阈值通常减少返回数量。</td></tr>
+<tr><td><code>iou</code></td><td>同类别重叠框过滤阈值，有限数值 0～1，例如 0.45。IoU 是两框交集面积除以并集面积。按置信度从高到低保留框，与已保留同类框的 IoU 大于阈值时删除该候选框。降低阈值会更积极地过滤重叠框。</td></tr>
+<tr><td><code>data</code></td><td>调用方可写缓冲区地址。可传 nullptr 查询所需容量。</td></tr>
+<tr><td><code>size</code></td><td>有效的 uint32_t 指针。调用前写入 data 可用容量，单位为字节。完成 BMP 编码后写回所需字节数。</td></tr>
+<tr><td><code>mode</code></td><td>0 表示标注类别编号和置信度，1 表示仅标注类别编号。</td></tr>
+</table>
+<h2>返回值与结果处理</h2><ul>
+<li>1 表示完整 BMP 字节已写入 data，*size 为实际大小。没有目标时也可成功返回区域图片。</li>
+<li>0 表示容量不足、data 为空或发生错误。查询容量成功时也返回 0，同时 *size 大于 0。其他失败应立即读取 GetOcrError()，并结合 *size 判断。</li>
+</ul>
+<h2>作用范围与调用说明</h2><ul>
+<li>调用前成功绑定目标窗口、等待首帧，并调用 AiYoloSetVersion、AiYoloSetModel（或内存版）、AiYoloUseModel。当前 ONNX 推理、预处理和重叠框过滤均在 CPU 执行。</li>
+<li>区域先从共享的完整采集帧中裁剪，再按比例缩放并补边为 640×640，转换为 RGB 浮点输入。结果坐标映射回客户区，包含检测区域的 x1、y1 偏移。</li>
+<li>三个检测入口共用检测结果缓存，缓存保存已经算出的检测框和对应区域图像。同一绑定、同一帧、同一模型及相同区域、prob、iou 且缓存仍保留时，复用结果并跳过取图、预处理和模型推理。</li>
+<li>SetFrameResultCache(0) 允许复用结果，为默认行为。SetFrameResultCache(1) 强制每次执行分析。此开关在 DLL 内全局共享，同帧像素仍可由帧缓存复用。缓存有容量限制，被淘汰的结果会重新计算。</li>
+<li>SetCaptureFrameInterval(-1) 固定已发布的采集快照，SetCaptureFrameInterval(0) 恢复无间隔采集。固定帧和复用结果分别由采集设置和结果缓存开关控制。</li>
+<li>输出为 24 位 BMP 文件字节，包含文件头。缓冲区由调用方分配和释放。该接口带原始指针输出参数，工作台无法直接调用，请通过 C/C++ 测试。</li>
+<li>查询容量也会执行检测及 BMP 编码。两次调用之间若帧或尺寸变化，第二次所需容量可能变化，应根据写回值扩容重试。复用检测结果时仍执行绘制和 BMP 编码。</li>
+</ul>
+<h2>完整 C++ 调用示例</h2>
+<p>路径使用本项目 Release 目录附带的 FP32 模型，按实际文件位置和窗口区域调整。本例独占绑定和全量结果释放时机，调用方须在目标窗口所属进程中运行。</p>
+<pre class="cpp"><code>#include &quot;FsDmJiekou.h&quot;
+#include &lt;cstdio&gt;
+#include &lt;fstream&gt;
+#include &lt;vector&gt;
+
+// 在目标窗口所属进程调用，hwnd 为实际窗口句柄。
+// 包含 FsDmJiekou.h，链接 ZhaoTu.lib，并部署配套 DLL 与模型。
+bool CeshiAiYoloDetectObjectsToDataBmp(HWND hwnd) {
+    if (!AiYoloSetVersion(&quot;v5-7.0&quot;)) return false;
+    if (!AiYoloSetModel(0, R&quot;(C:\Users\Administrator\Documents\DaMo\FsDm\out\build\bin\Release\YoloMoxing\yolov5n.onnx)&quot;, &quot;&quot;)) {
+        std::printf(&quot;%s\n&quot;, GetOcrError());
+        FreeAllStringResults();
+        return false;
+    }
+    if (!AiYoloUseModel(0)) {
+        AiYoloFreeModel(0);
+        return false;
+    }
+    if (!BindWindow(hwnd, &quot;dx&quot;, &quot;normal&quot;, &quot;normal&quot;, 0)) {
+        AiYoloFreeModel(0);
+        return false;
+    }
+    // 绑定成功后等待首张可用快照，最多约一秒。
+    bool ready = false;
+    for (int attempt = 0; attempt &lt; 100; ++attempt) {
+        FsZhuangtai state{};
+        state.size = sizeof(state);
+        if (GetStatus(&amp;state) == FS_CHENGGONG &amp;&amp; state.result == FS_CHENGGONG
+            &amp;&amp; state.bound &amp;&amp; state.hasFrame) {
+            ready = true;
+            break;
+        }
+        Sleep(10);
+    }
+    bool ok = false;
+    if (ready) {
+        uint32_t required = 0;
+        const int query = AiYoloDetectObjectsToDataBmp(
+            0, 0, 834, 419, 0.5, 0.45, nullptr, &amp;required, 0);
+        if (query == 0 &amp;&amp; required &gt; 0) {
+            std::vector&lt;unsigned char&gt; bmp(required);
+            // 帧可能变化，容量不足时按写回的新大小扩容，最多尝试三次。
+            for (int attempt = 0; attempt &lt; 3; ++attempt) {
+                uint32_t capacity = static_cast&lt;uint32_t&gt;(bmp.size());
+                const int result = AiYoloDetectObjectsToDataBmp(
+                    0, 0, 834, 419, 0.5, 0.45, bmp.data(), &amp;capacity, 0);
+                if (result == 1) {
+                    std::ofstream output(R&quot;(C:\Users\Administrator\Documents\DaMo\FsDm\yolo_result.bmp)&quot;, std::ios::binary);
+                    output.write(reinterpret_cast&lt;const char*&gt;(bmp.data()), capacity);
+                    ok = static_cast&lt;bool&gt;(output);
+                    break;
+                }
+                const char* error = GetOcrError();
+                if ((error &amp;&amp; *error) || capacity &lt;= bmp.size()) break;
+                bmp.resize(capacity);
+            }
+        }
+        if (!ok) std::printf(&quot;BMP 输出失败，%s\n&quot;, GetOcrError());
+    }
+    // 本例全部结果读取结束后统一释放。
+    FreeAllStringResults();
+    UnBindWindow();
+    const bool freed = AiYoloFreeModel(0) == 1;
+    return ok &amp;&amp; freed;
+}</code></pre>
+<p><a href="WanZhengDiaoyong.html#yolo">工作台逐行输入示例、返回值检查和模型要求</a>。</p>
+</body></html>

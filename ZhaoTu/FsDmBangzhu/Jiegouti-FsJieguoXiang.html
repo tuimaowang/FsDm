@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>FsJieguoXiang 结构说明</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:28px 36px;max-width:1000px}
+h1{font-size:26px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}
+table{border-collapse:collapse;width:100%;margin:12px 0}
+th,td{border:1px solid #d6e0e4;padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eaf2f2}
+</style>
+</head>
+<body>
+<p>FsDm 帮助 &gt; 结构体 &gt; FsJieguoXiang</p>
+<h1>FsJieguoXiang</h1>
+<p><code>FsJieguoXiang</code> 不是函数单独返回的结构，而是找图、找色、OCR 和找字函数返回的 <code>FsTongyongJieguo.items</code> 结果数组中的一项，结构大小为 40 字节。字段是否有效由 <code>fields</code> 标志决定。</p>
+<table>
+<tr><th>字段</th><th>含义</th></tr>
+<tr><td><code>fields</code></td><td>字段标志组合，说明本项哪些字段有效。</td></tr>
+<tr><td><code>id</code></td><td>输入颜色、模板或待查文字列表中的从 0 开始索引；仅对应 ID 标志有效时读取。</td></tr>
+<tr><td><code>x</code>、<code>y</code></td><td>结果坐标；找图为模板左上角，多点找色为整组匹配首点。仅坐标标志有效时读取。</td></tr>
+<tr><td><code>color</code></td><td><code>0xRRGGBB</code> 格式的 RGB 整数；0 是有效黑色，需先检查颜色标志。</td></tr>
+<tr><td><code>text</code></td><td>UTF-8 识别文字，仅文字标志有效时读取。</td></tr>
+<tr><td><code>file</code></td><td>命中的模板名称，仅文件标志有效时读取。</td></tr>
+</table>
+<p>所属结果结构：<a href="Jiegouti-FsTongyongJieguo.html">FsTongyongJieguo</a>。</p>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>ReleaseGpuFrame - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="releasegpuframe">ReleaseGpuFrame</h1>
+<p><strong>函数简介：</strong></p>
+<p>释放此前 AcquireGpuFrame 获得的 GPU 帧租约。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI ReleaseGpuFrame(uint64_t token);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>token：AcquireGpuFrame 返回的有效租约标识，64 位无符号整数。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>0：释放成功。</li>
+<li>4：token 无效或重复释放等。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+// C++ 调用；token 必须来自本次进程实际取得的租约。
+int ret = ReleaseGpuFrame(g.token);
+</code></pre>
+<p><strong>注意：</strong> 须等调用方 GPU 操作完成后再释放。解绑后仍可释放旧 token；不能仅提交 GPU 命令就立即释放。</p>
+
+</body></html>

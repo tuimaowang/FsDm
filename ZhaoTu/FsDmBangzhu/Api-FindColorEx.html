@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>FindColorEx - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="findcolorex">FindColorEx</h1>
+<p><strong>函数简介：</strong></p>
+<p>查找指定区域的颜色。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+const FsTongyongJieguo* WINAPI FindColorEx(int x1, int y1, int x2, int y2, const char* color, double sim, int dir);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>x1、y1：搜索区域左上角客户区坐标。</li>
+<li>x2、y2：搜索区域右下角客户区坐标，包含右下边界，超出客户区的部分会裁剪。</li>
+<li>color：RGB 颜色串，格式为 RRGGBB[-DRDGDB]，多个颜色用 | 分隔，例如 &quot;123456-000000|ffffff-020202&quot;。</li>
+<li>sim：范围 0.1～1.0，使用本页“找图找色相似度规则”，不是命中像素比例。</li>
+<li>dir：支持 0～3、5～8，不支持 4。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>返回独立的 <code>FsTongyongJieguo</code> 指针。<code>status=0</code> 正常，<code>count=0</code> 无命中；错误为非 0 状态，分配失败为 <code>nullptr</code>。</li>
+<li>条目提供颜色索引 id 和客户区坐标 x/y。</li>
+<li>条目有效字段标志：<code>FS_JG_ID | FS_JG_XY</code>；用完后通过 DLL 释放。fullText 为空字符串。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+FindColorEx(0, 0, 833, 418, &quot;ffffff-000000|123456-020202&quot;, 1.0, 0)
+</code></pre>
+<p><strong>注意：</strong> 按颜色列表优先，支持方向 0～3、5～8；对每种颜色返回搜索区域内的全部命中，不设固定条数或 1024 字符上限。多个颜色都匹配同一坐标时，会按各自的颜色索引分别返回该坐标。结果数量受命中点数量和可用内存限制；通过 count 和 items 读取。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#color">FindColorEx 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

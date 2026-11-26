@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>GetGpuUsage - FsDm 调试函数</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}
+h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}
+h2{font-size:18px;color:#176a70;margin:24px 0 8px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+</style>
+</head>
+<body>
+<h1 id="getgpuusage">GetGpuUsage</h1>
+<p>测试当前设备所有显卡中最繁忙引擎的占用率。引擎是显卡执行图形、计算、复制、视频等工作的执行单元。本函数汇总整台电脑各进程在同一显卡、同一引擎上的工作量，再取最高值。可在未绑定窗口的状态下调用。</p>
+<h2>函数声明</h2>
+<pre><code>double WINAPI GetGpuUsage(void);</code></pre>
+<h2>参数与返回值</h2>
+<p>无参数。成功返回 0～100 的小数，例如 48.25 表示 48.25%。失败返回 -1，可立即调用 Windows 的 GetLastError 获取系统或 PDH 错误码。PDH 是 Windows 提供的性能计数器接口。</p>
+<h2>统计与采样方式</h2>
+<p>通过 Windows 的 GPU Engine 性能计数器采样，覆盖图形、计算、复制和视频等系统公开的引擎。两个进程在同一引擎上的占用率分别为 20% 和 30% 时，先汇总为 50%，再与其他引擎比较。多显卡取其中最繁忙引擎的值。</p>
+<p>每次同步采集两次数据，中间等待约 200 毫秒，返回这个时间窗口的平均占用率。实际耗时还包含计数器初始化和系统调度开销。各次调用、各线程使用独立查询。</p>
+<p>系统与显卡驱动需要提供 GPU Engine 性能计数器。驱动、权限、计数器或有效采样不可用时返回 -1。新出现或已退出的进程实例可能缺少有效的两次采样，有效实例参与本次汇总。</p>
+<p>建议通过独立监测线程观察持续执行的 OCR、找图、YOLO 或其他程序。工作台顺序执行函数时，采样覆盖本函数执行期间约 200 毫秒。任务管理器的刷新时刻与采样区间可能产生读数差异。</p>
+<h2>工作台完整调用实例</h2>
+<pre><code>// 加载 ZhaoTu.dll 后逐行输入。
+GetGpuUsage()
+GetCpuUsage()
+GetGpuUsage()</code></pre>
+<h2>C++ 完整调用实例</h2>
+<pre><code>// 配置 ZhaoTu.h 的包含目录，链接 ZhaoTu.lib，运行时加载配套 ZhaoTu.dll。
+#include "ZhaoTu.h"
+#include &lt;cstdio&gt;
+
+int main() {
+    for (int i = 0; i &lt; 5; ++i) {
+        const double gpu = GetGpuUsage();
+        const DWORD error = GetLastError();
+        if (gpu &lt; 0.0) {
+            std::printf("GetGpuUsage failed, error=0x%08lX\n", error);
+            return 1;
+        }
+        std::printf("GPU %.2f%%\n", gpu);
+        Sleep(800);
+    }
+    return 0;
+}</code></pre>
+<p>相关函数 <a href="Api-GetCpuUsage.html">GetCpuUsage</a>。两者各自按调用时间独立采样。</p>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>SetPath - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="setpath">SetPath</h1>
+<p><strong>函数简介：</strong></p>
+<p>设置截图、模板及 OCR 资源等相对路径使用的基础目录。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI SetPath(const char* path);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>path：UTF-8 目录路径；目录必须已经存在。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：设置成功。</li>
+<li>0：路径无效、目录不存在或设置失败。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+SetPath(&quot;C:\Users\Administrator\Documents\DaMo\FsDm&quot;)
+</code></pre>
+<p><strong>注意：</strong> 绝对路径不受此设置影响。尚未设置时，相对路径按宿主进程当前目录解析。此函数不会创建目录。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#pic">SetPath 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

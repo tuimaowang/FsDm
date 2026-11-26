@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>GetNowDict - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="getnowdict">GetNowDict</h1>
+<p><strong>函数简介：</strong></p>
+<p>获取当前选择的点阵字库编号。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI GetNowDict(void);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>无。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>当前选择编号，范围 0～99；这是编号，不是成功或失败标志。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+GetNowDict()
+</code></pre>
+<p><strong>注意：</strong> 默认编号为 0。返回编号不保证该字库已经加载，清空字库不会自动改选其他编号。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-dict">GetNowDict 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

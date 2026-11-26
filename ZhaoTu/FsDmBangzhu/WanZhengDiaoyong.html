@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>完整调用实例</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}
+h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}
+h2{font-size:20px;color:#176a70;margin-top:30px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+table{border-collapse:collapse;margin:8px 0;width:100%}th,td{border:1px solid #d6e0e4;padding:6px 10px;text-align:left;vertical-align:top}
+</style>
+</head>
+<body>
+<h1 id="wan-zheng-diao-yong">完整调用实例</h1>
+<p>以下示例按实际操作流程组织。工作台代码块逐行输入；工作台会显示返回值并自动释放本次通用结果。C++ 代码块用于包含交付头文件并链接或动态加载 ZhaoTu.dll 的业务程序，窗口句柄、路径和模型文件应替换为本机实际值。</p>
+<p>除屏幕文件 OCR、模板内存和底层 GPU 接口外，找图、找色、窗口 OCR、找字及 YOLO 均先绑定目标窗口并等待首帧。普通结果先检查指针和 status，再读取 count/items/fullText，最后调用 FreeResult；独立字符串使用完后调用 FreeAllStringResults。解绑前应释放仍持有的 GPU 帧租约。</p>
+
+<h2 id="binding">绑定、采集设置与解绑</h2>
+<p>适用函数：<code>BindWindow</code>、<code>UnBindWindow</code>、<code>SetCaptureFrameInterval</code>、<code>GetFrameNumber</code>、<code>GetStatus</code>、<code>GetFindStatus</code>、<code>GetOcrStatus</code>。</p>
+<pre><code>// 工作台示例；替换为本进程中目标窗口的实际句柄。
+BindWindow(0x实际窗口句柄, "dx", "normal", "normal", 0)
+SetCaptureFrameInterval(1)
+GetFrameNumber(1)
+status
+GetFrameNumber(0)
+SetCaptureFrameInterval(0)
+UnBindWindow()</code></pre>
+<p>状态结构输出参数不支持工作台时，使用 C++；查询结构前必须设置 size：</p>
+<pre><code>FsZhuangtai capture{};
+capture.size = sizeof(capture);
+int captureStatus = GetStatus(&amp;capture);
+
+FsChazhaoZhuangtai findDetails{};
+findDetails.size = sizeof(findDetails);
+int findStatus = GetFindStatus(&amp;findDetails);
+
+FsOcrZhuangtai ocrDetails{};
+ocrDetails.size = sizeof(ocrDetails);
+int ocrStatus = GetOcrStatus(&amp;ocrDetails);</code></pre>
+<p>同样的绑定流程下，可按需调用其他设置和状态函数：</p>
+<pre><code>SetCaptureFrameInterval(-1) // 固定当前快照
+GetFrameNumber(0)           // 查询编号并关闭工作台持续输出
+SetCaptureFrameInterval(0)  // 恢复逐帧采集
+UnBindWindow()</code></pre>
+
+<h2 id="usage">设备占用率测试</h2>
+<p>适用函数 <a href="Api-GetCpuUsage.html">GetCpuUsage</a>、<a href="Api-GetGpuUsage.html">GetGpuUsage</a>。加载 ZhaoTu.dll 后即可测试，每次各采样约 200 毫秒，返回 0～100 的小数，-1 表示失败。CPU 统计整机全部逻辑处理器平均忙碌时间，GPU 汇总各进程后取所有显卡中最繁忙引擎的占用率。</p>
+<pre><code>// 工作台逐行执行，两个读数各自对应独立的采样时间窗口。
+GetCpuUsage()
+GetGpuUsage()</code></pre>
+<p>C++ 项目包含 ZhaoTu.h，链接 ZhaoTu.lib，并部署配套 ZhaoTu.dll。下面是可直接运行的完整程序。</p>
+<pre><code>#include "ZhaoTu.h"
+#include &lt;cstdio&gt;
+
+int main() {
+    const double cpu = GetCpuUsage();
+    const DWORD cpuError = GetLastError();
+    const double gpu = GetGpuUsage();
+    const DWORD gpuError = GetLastError();
+    if (cpu &lt; 0.0) std::printf("CPU sample failed, error=0x%08lX\n", cpuError);
+    else std::printf("CPU %.2f%%\n", cpu);
+    if (gpu &lt; 0.0) std::printf("GPU sample failed, error=0x%08lX\n", gpuError);
+    else std::printf("GPU %.2f%%\n", gpu);
+    return cpu &lt; 0.0 || gpu &lt; 0.0 ? 1 : 0;
+}</code></pre>
+
+<h2 id="pic">普通找图与 OpenCV 找图</h2>
+<p>适用函数：<code>SetPath</code>、<code>SetFindBackend</code>、<code>LoadPic</code>、<code>FindPic</code>、<code>FindPicS</code>、<code>FindPicEx</code>、<code>FindPicExS</code>、<code>CvFindPic</code>、<code>CvFindPicEx</code>、<code>CvFindPicMem</code>、<code>CvFindPicMemEx</code>。</p>
+<pre><code>// 工作台调用流程；模板路径相对于 SetPath 指定目录。
+BindWindow(0x实际窗口句柄, "dx", "normal", "normal", 0)
+SetPath("C:\模板目录")
+SetFindBackend("gpu")
+LoadPic("按钮.bmp|图标.png")
+FindPicEx(0, 0, 800, 600, "按钮.bmp|图标.png", "000000", 0.9, 0)
+FreePic("按钮.bmp|图标.png")
+UnBindWindow()</code></pre>
+<p>C++ 结果读取与释放示例。将 <code>FindPicEx</code> 替换为上表中的任一结构化找图入口时，按该入口原型调整参数；内存模板入口还需先用 <code>LoadPicByte</code> 登记完整 BMP 文件数据，结束后调用 <code>FreePic</code>。</p>
+<pre><code>const FsTongyongJieguo* result =
+    FindPicEx(0, 0, 800, 600, "button.bmp|icon.png", "000000", 0.9, 0);
+if (result != nullptr) {
+    if (result-&gt;status == FS_CHENGGONG) {
+        for (uint32_t i = 0; i &lt; result-&gt;count; ++i) {
+            const FsJieguoXiang&amp; item = result-&gt;items[i];
+            // item.id 是模板索引；item.x/y 是匹配位置；item.file 是模板名。
+        }
+    }
+    FreeResult(result);
+}</code></pre>
+<p><code>CvFindPic*</code> 是 OpenCV CPU 模板匹配入口，返回 <code>FsTongyongJieguo</code>，使用后调用 <code>FreeResult</code> 释放。</p>
+<p>各入口的具体调用形式如下。文件版使用图片路径；OpenCV 内存模板版须先用 <code>LoadPicByte</code> 登记 BMP24 别名。</p>
+<pre><code>// 普通 GPU/CPU 可选找图
+FindPic(0, 0, 800, 600, "button.bmp", "000000", 0.9, 0)
+FindPicS(0, 0, 800, 600, "button.bmp", "000000", 0.9, 0)
+FindPicEx(0, 0, 800, 600, "button.bmp", "000000", 0.9, 0)
+FindPicExS(0, 0, 800, 600, "button.bmp", "000000", 0.9, 0)
+
+// OpenCV CPU 模板匹配
+CvFindPic(0, 0, 800, 600, "button.bmp", 0.9, 0)
+CvFindPicEx(0, 0, 800, 600, "button.bmp", 0.9, 0)
+CvFindPicMem(0, 0, 800, 600, "memory.bmp", 0.9, 0)
+CvFindPicMemEx(0, 0, 800, 600, "memory.bmp", 0.9, 0)
+</code></pre>
+
+<h2 id="color">取色、比色与找色</h2>
+<p>适用函数：<code>GetColor</code>、<code>CmpColor</code>、<code>FindColor</code>、<code>FindColorEx</code>、<code>FindMultiColor</code>、<code>FindMultiColorEx</code>。</p>
+<pre><code>// 工作台：获取坐标颜色、比较颜色，再列举区域内的多色坐标。
+BindWindow(0x实际窗口句柄, "dx", "normal", "normal", 0)
+GetColor(30, 30)
+CmpColor(30, 30, "ffffff-202020", 0.9)
+FindColorEx(0, 0, 799, 599, "ffffff-202020|ff0000-101010", 0.9, 0)
+FindMultiColorEx(0, 0, 799, 599, "cc805b-020202", "9|2|-00ff00,15|2|2dff1c-010101", 0.9, 0)
+UnBindWindow()</code></pre>
+<p>从 C++ 读取找色结果时，检查 <code>status</code> 后遍历所有 <code>items</code>，再释放结果：</p>
+<pre><code>const FsTongyongJieguo* result =
+    FindColorEx(0, 0, 799, 599, "ffffff-202020|ff0000-101010", 0.9, 0);
+if (result != nullptr) {
+    if (result-&gt;status == FS_CHENGGONG) {
+        for (uint32_t i = 0; i &lt; result-&gt;count; ++i) {
+            const FsJieguoXiang&amp; item = result-&gt;items[i];
+            // item.id 是颜色列表索引；item.x/y 是命中坐标。
+        }
+    }
+    FreeResult(result);
+}</code></pre>
+<p>以下代码块适合工作台逐条运行；在 C++ 中，每次返回结构化结果后都要按上面的方式检查并调用 <code>FreeResult</code>：</p>
+<pre><code>GetColor(30, 30)
+CmpColor(30, 30, "ffffff-202020", 0.9)
+FindColor(0, 0, 799, 599, "ffffff-202020", 0.9, 0)
+FindColorEx(0, 0, 799, 599, "ffffff-202020|ff0000-101010", 0.9, 0)
+FindMultiColor(0, 0, 799, 599, "cc805b-020202", "9|2|-00ff00", 0.9, 0)
+FindMultiColorEx(0, 0, 799, 599, "cc805b-020202", "9|2|-00ff00", 0.9, 0)</code></pre>
+
+<h2 id="ocr-model">OCR 模型完整流程</h2>
+<p>适用函数：<code>SetOcrModel</code>、<code>SetOcrModelFiles</code>、<code>UseOcrModel</code>、<code>SetOcrEngine</code>、<code>SetOcrBackend</code>、<code>Ocr</code>、<code>OcrEx</code>、<code>OcrExOne</code>、<code>GetOcrError</code>、<code>FreeOcrModel</code>。<code>UseOcrModel</code> 选择的是当前进程该 ZhaoTu.dll 实例共享的模型编号。</p>
+<pre><code>// 工作台：路径请换成本机兼容的模型文件。
+SetOcrModelFiles(1, "C:\ocr\models10\cls.onnx", "C:\ocr\models10\detEN.onnx", "C:\ocr\models10\RecEN.onnx", "C:\ocr\models10\KeysEN.txt")
+UseOcrModel(1)
+SetOcrEngine("model")
+SetOcrBackend("cpu")
+BindWindow(0x实际窗口句柄, "dx", "normal", "normal", 0)
+OcrEx(0, 0, 800, 600, "", 0.5)
+GetOcrError()
+UnBindWindow()
+FreeOcrModel(1)</code></pre>
+<p>C++ 中取得全文和逐字符坐标的完整结果处理示例：</p>
+<pre><code>const FsTongyongJieguo* result = OcrEx(0, 0, 800, 600, "", 0.5);
+if (result != nullptr) {
+    if (result-&gt;status == FS_CHENGGONG) {
+        const char* fullText = result-&gt;fullText;
+        for (uint32_t i = 0; i &lt; result-&gt;count; ++i) {
+            const FsJieguoXiang&amp; item = result-&gt;items[i];
+            // 使用 item.text、item.x、item.y。
+        }
+        // 在此消费 fullText；不要在 FreeResult 后保留其指针。
+    } else {
+        const char* error = GetOcrError();
+        // 在此记录 OCR 错误。
+    }
+    FreeResult(result);
+}</code></pre>
+<p>模型目录也可使用单目录登记接口；登记后仍需选择模型编号并选择 model 引擎：</p>
+<pre><code>SetOcrModel(1, "C:\ocr\models")
+UseOcrModel(1)
+SetOcrEngine("model")
+SetOcrBackend("cpu")
+Ocr(0, 0, 800, 600, "", 0.5)
+OcrExOne(0, 0, 800, 600, "", 0.5)</code></pre>
+
+<h2 id="ocr-dict">点阵字库 OCR 与找字</h2>
+<p>适用函数：<code>SetDict</code>、<code>SetDictMemory</code>、<code>UseDict</code>、<code>GetNowDict</code>、<code>GetDictCount</code>、<code>ClearDict</code>、全部 <code>FindStr*</code>。</p>
+<pre><code>// 工作台：设置并选择字库，查询字库状态，再查找目标文字。
+SetDict(0, "C:\字库\ziku.txt")
+// 或在 C++ 中将内存缓冲区地址和字节数传给 SetDictMemory。
+UseDict(0)
+SetOcrEngine("dict")
+GetNowDict()
+GetDictCount(0)
+BindWindow(0x实际窗口句柄, "dx", "normal", "normal", 0)
+FindStrEx(0, 0, 800, 600, "开始游戏|确定", "", 1.0)
+FindStrFastEx(0, 0, 800, 600, "长安|洛阳", "", 1.0)
+UnBindWindow()
+ClearDict(0)</code></pre>
+<p>字典引擎下，普通版检查完整目标文字，快速版允许过滤非目标字符；<code>Ex</code> 返回全部命中，其他版本按各函数说明返回首个或有限结果。每次 C++ 调用都按通用结构读取并调用 <code>FreeResult</code>。</p>
+<pre><code>// 找字函数的具体入口（都要求先绑定窗口）。
+FindStr(0, 0, 800, 600, "开始游戏|确定", "", 1.0)
+FindStrS(0, 0, 800, 600, "开始游戏|确定", "", 1.0)
+FindStrEx(0, 0, 800, 600, "开始游戏|确定", "", 1.0)
+FindStrExS(0, 0, 800, 600, "开始游戏|确定", "", 1.0)
+FindStrFast(0, 0, 800, 600, "长安|洛阳", "", 1.0)
+FindStrFastS(0, 0, 800, 600, "长安|洛阳", "", 1.0)
+FindStrFastEx(0, 0, 800, 600, "长安|洛阳", "", 1.0)
+FindStrFastExS(0, 0, 800, 600, "长安|洛阳", "", 1.0)</code></pre>
+
+<h2 id="capture">截图与文件 OCR</h2>
+<p>适用函数：<code>Capture</code>、<code>CaptureJpg</code>、<code>CapturePng</code>、<code>CaptureGif</code>、<code>OcrInFile</code>。</p>
+<pre><code>// 工作台：截图需绑定且已经有首帧；文件 OCR 使用磁盘上的图片。
+BindWindow(0x实际窗口句柄, "dx", "normal", "normal", 0)
+Capture(0, 0, 800, 600, "screen.bmp", 2)
+CaptureJpg(0, 0, 800, 600, "screen.jpg", 2)
+CapturePng(0, 0, 800, 600, "screen.png", 2)
+CaptureGif(0, 0, 800, 600, "screen.gif", 100, 3000)
+UnBindWindow()
+OcrInFile(0, 0, 800, 600, "screen.bmp", "", 0.5)</code></pre>
+<p><code>OcrInFile</code> 只读取已有图片文件，不依赖窗口绑定；OCR 引擎、后端和结果读取规则与窗口 OCR 一致。</p>
+
+<h2 id="template">模板、路径与字符串生命周期</h2>
+<p>适用函数：<code>SetPath</code>、<code>LoadPic</code>、<code>LoadPicByte</code>、<code>FreePic</code>、<code>MatchPicName</code>、<code>FreeAllResults</code>、<code>FreeAllStringResults</code>。</p>
+<pre><code>// 工作台：先设基础目录，再预载模板并查找；字符串列表使用后全量释放。
+SetPath("C:\项目\图片")
+SetTemplateCacheLimit(536870912)
+LoadPic("button.bmp|icon.png")
+MatchPicName("button*.bmp|icon*.png")
+FreeAllStringResults()
+FreePic("button.bmp|icon.png")</code></pre>
+<p><code>MatchPicName</code> 返回的字符串属于 DLL；C++ 调用方须复制/处理完后用 <code>FreeAllStringResults</code> 或 <code>FreeAllResults</code> 释放。结构化查找结果用 <code>FreeResult</code> 单独释放；全量释放前须确保没有线程仍在读取结果。</p>
+<p>内存 BMP 模板示例（<code>bmpData</code> 指向包含 BMP 文件头的完整 BMP24 文件）：</p>
+<pre><code>if (LoadPicByte(reinterpret_cast&lt;uintptr_t&gt;(bmpData), bmpSize, "memory.bmp") == 1) {
+    const FsTongyongJieguo* result =
+        CvFindPicMem(0, 0, 800, 600, "memory.bmp", 0.95, 0);
+    if (result != nullptr) {
+        if (result-&gt;status == FS_CHENGGONG) {
+            // 读取 result-&gt;count 和 result-&gt;items。
+        }
+        FreeResult(result);
+    }
+    FreePic("memory.bmp");
+}</code></pre>
+
+<h2 id="yolo">YOLO 模型与检测</h2>
+<p>当前模型解析格式为 <code>"v5-7.0"</code>，使用 CPU 推理。请准备 Release 目录中成对的 <code>YoloMoxing/yolov5n.onnx</code> 与 <code>yolov5n.class</code>。模型表和选中编号在当前进程的 DLL 内跨线程共享。</p>
+<p><a href="AiJiance.html">YOLO 模型格式、同帧缓存及函数总览</a>中列出全部 10 个接口。每个函数都有独立说明页和完整 C++ 示例。</p>
+<h3>工作台完整调用</h3>
+<p>按顺序逐行输入。设置版本、加载、选择模型和绑定的返回值均应为 1，任一步失败先处理该步错误。模型路径使用本项目附带资源，窗口句柄与检测区域按目标调整。</p>
+<pre><code>// 在已加载 ZhaoTu.dll 的工作台中逐行输入，替换实际窗口句柄。
+AiYoloSetVersion(&quot;v5-7.0&quot;)
+AiYoloSetModel(0, &quot;C:\Users\Administrator\Documents\DaMo\FsDm\out\build\bin\Release\YoloMoxing\yolov5n.onnx&quot;, &quot;&quot;)
+AiYoloUseModel(0)
+BindWindow(0x实际窗口句柄, &quot;dx&quot;, &quot;normal&quot;, &quot;normal&quot;, 0)
+status
+// 等 status 显示已取得画面，再执行检测。
+AiYoloDetectObjects(0, 0, 834, 419, 0.5, 0.45)
+GetOcrError()
+AiYoloDetectObjectsToFile(0, 0, 834, 419, 0.5, 0.45, &quot;C:\Users\Administrator\Documents\DaMo\FsDm\yolo_result.bmp&quot;, 0)
+GetOcrError()
+UnBindWindow()
+AiYoloFreeModel(0)</code></pre>
+<p>模型加载失败、检测或输出图片失败时，立即在同线程读取 <code>GetOcrError()</code>。检测返回空字符串且诊断为空时，表示本次成功但没有目标。版本设置、模型选择和释放函数按返回值判断。</p>
+<h3>工作台排序与类别名转换</h3>
+<p>在上面的 <code>UnBindWindow</code> 和 <code>AiYoloFreeModel</code> 之前输入下面的命令。工作台会自动释放前一次调用返回的字符串，跨调用传递结果时，把检测输出复制为字符串参数。以下类别 0 和 2 对应附带模型的 person 与 car。</p>
+<pre><code>// 以下条目用于演示格式，实际使用时复制本次检测返回的字符串。
+AiYoloSortsObjects(&quot;0,0.920000,300,10,20,20|2,0.850000,100,30,20,20&quot;, 0)
+AiYoloObjectsToString(&quot;0,0.920000,300,10,20,20|2,0.850000,100,30,20,20&quot;)</code></pre>
+<p>上例 height=0，x=100 的条目先输出，随后是 x=300 的条目。height 大于 0 时先按行高分组，各行按 x 排序。名称转换返回 <code>person|car</code>，顺序按传入的原始字符串确定。</p>
+<h3>C++ 检测、排序、名称转换及保存标注图片</h3>
+<p>本例在目标窗口所属进程运行，包含交付头文件并链接 ZhaoTu.lib，部署配套 DLL。示例独占绑定和结果释放时机，业务程序应协调其他线程的模型选择和结果读取。</p>
+<pre class="cpp"><code>#include &quot;FsDmJiekou.h&quot;
+#include &lt;cstdio&gt;
+
+// 在目标窗口所属进程调用，hwnd 为实际窗口句柄。
+// 包含 FsDmJiekou.h，链接 ZhaoTu.lib，并部署配套 DLL 与模型。
+bool CeshiYoloWanzheng(HWND hwnd) {
+    if (!AiYoloSetVersion(&quot;v5-7.0&quot;)) return false;
+    if (!AiYoloSetModel(0, R&quot;(C:\Users\Administrator\Documents\DaMo\FsDm\out\build\bin\Release\YoloMoxing\yolov5n.onnx)&quot;, &quot;&quot;)) {
+        std::printf(&quot;%s\n&quot;, GetOcrError());
+        FreeAllStringResults();
+        return false;
+    }
+    if (!AiYoloUseModel(0)) {
+        AiYoloFreeModel(0);
+        return false;
+    }
+    if (!BindWindow(hwnd, &quot;dx&quot;, &quot;normal&quot;, &quot;normal&quot;, 0)) {
+        AiYoloFreeModel(0);
+        return false;
+    }
+    // 绑定成功后等待首张可用快照，最多约一秒。
+    bool ready = false;
+    for (int attempt = 0; attempt &lt; 100; ++attempt) {
+        FsZhuangtai state{};
+        state.size = sizeof(state);
+        if (GetStatus(&amp;state) == FS_CHENGGONG &amp;&amp; state.result == FS_CHENGGONG
+            &amp;&amp; state.bound &amp;&amp; state.hasFrame) {
+            ready = true;
+            break;
+        }
+        Sleep(10);
+    }
+    bool ok = false;
+    if (ready) {
+        const char* objects = AiYoloDetectObjects(0, 0, 834, 419, 0.5, 0.45);
+        // 立即读取本线程检测诊断，避免后续调用覆盖诊断。
+        const char* error = GetOcrError();
+        if (objects &amp;&amp; error &amp;&amp; *error == &#x27;\0&#x27;) {
+            std::printf(&quot;objects=%s\n&quot;, objects);
+            const char* sorted = AiYoloSortsObjects(objects, 20);
+            const char* names = sorted ? AiYoloObjectsToString(sorted) : nullptr;
+            if (sorted &amp;&amp; names) {
+                std::printf(&quot;sorted=%s\nnames=%s\n&quot;, sorted, names);
+                ok = (*objects == &#x27;\0&#x27;) || (*sorted != &#x27;\0&#x27; &amp;&amp; *names != &#x27;\0&#x27;);
+                if (ok) {
+                    ok = AiYoloDetectObjectsToFile(0, 0, 834, 419, 0.5, 0.45,
+                                R&quot;(C:\Users\Administrator\Documents\DaMo\FsDm\yolo_result.bmp)&quot;, 0) == 1;
+                    if (!ok) std::printf(&quot;%s\n&quot;, GetOcrError());
+                }
+            }
+        } else {
+            std::printf(&quot;%s\n&quot;, error ? error : &quot;结果内存分配失败&quot;);
+        }
+    }
+    // 本例全部结果读取结束后统一释放。
+    FreeAllStringResults();
+    UnBindWindow();
+    const bool freed = AiYoloFreeModel(0) == 1;
+    return ok &amp;&amp; freed;
+}</code></pre>
+<h3>内存模型与 BMP 缓冲区</h3>
+<p><a href="Api-AiYoloSetModelMemory.html#aiyolosetmodelmemory">AiYoloSetModelMemory 的完整示例</a>包含读取 ONNX 字节、传入地址、检测和释放。内存版类别名自动使用数字字符串。</p>
+<p><a href="Api-AiYoloDetectObjectsToDataBmp.html#aiyolodetectobjectstodatabmp">AiYoloDetectObjectsToDataBmp 的完整示例</a>包含查询容量、分配缓冲区、尺寸变化时重试、写入文件和释放。该接口通过 C/C++ 调用。</p>
+<h3>同帧结果复用</h3>
+<p>默认允许复用同帧同模型同参数的检测结果，三个检测入口共享此缓存。<code>SetFrameResultCache(0)</code> 允许复用，<code>SetFrameResultCache(1)</code> 强制重新分析。<code>SetCaptureFrameInterval(-1)</code> 固定采集快照，<code>SetCaptureFrameInterval(0)</code> 恢复无间隔采集。结果复用开关和帧间隔设置在 DLL 内全局共享。</p>
+<p>结果缓存开关的参数、全局作用范围及与像素帧缓存的区别见 <a href="Api-SetFrameResultCache.html#setframeresultcache">SetFrameResultCache 函数说明</a>。</p>
+
+<h2 id="display-dead">卡屏检测与单点颜色比较</h2>
+<p>适用函数：<code>IsDisplayDead</code>、<code>GetColor</code>、<code>CmpColor</code>。</p>
+<pre><code>// 工作台：检测区域是否在 5 秒内始终没有像素变化。
+BindWindow(0x实际窗口句柄, "dx", "normal", "normal", 0)
+IsDisplayDead(0, 0, 100, 100, 5)
+GetColor(30, 30)
+CmpColor(30, 30, "ffffff-202020", 0.9)
+UnBindWindow()</code></pre>
+<p>检测返回 0 时如需区分“画面变化”和“检测错误”，紧接着在同一线程读取 <code>GetFindStatus</code>；详见该函数页。</p>
+
+<h2 id="all-results">结果释放规则</h2>
+<p>适用函数：<code>FreeResult</code>、<code>FreeAllResults</code>、<code>FreeAllStringResults</code>。</p>
+<pre><code>// C++：处理一条结构化结果后精确释放。
+const FsTongyongJieguo* result = GetColor(30, 30);
+if (result != nullptr) {
+    if (result-&gt;status == FS_CHENGGONG &amp;&amp; result-&gt;count &gt; 0) {
+        const uint32_t color = result-&gt;items[0].color;
+        (void)color;
+    }
+    FreeResult(result);
+}
+
+// 仅在需要清理本次进程所有仍未释放的结果时使用二者之一。
+FreeAllResults();
+// 或 FreeAllStringResults(); 无需对同一批结果连续调用两者。</code></pre>
+
+<p>各函数的专用参数、错误码和边界行为仍以对应的函数主题为准。<a href="Shouye.html">返回帮助首页</a></p>
+</body>
+</html>

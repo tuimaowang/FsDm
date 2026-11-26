@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>GetCpuUsage - FsDm 调试函数</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}
+h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}
+h2{font-size:18px;color:#176a70;margin:24px 0 8px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+</style>
+</head>
+<body>
+<h1 id="getcpuusage">GetCpuUsage</h1>
+<p>测试当前设备全部逻辑处理器的平均忙碌时间百分比，包含整台电脑上各进程的 CPU 工作量。可在未绑定窗口的状态下调用。</p>
+<h2>函数声明</h2>
+<pre><code>double WINAPI GetCpuUsage(void);</code></pre>
+<h2>参数与返回值</h2>
+<p>无参数。成功返回 0～100 的小数，例如 23.56 表示 23.56%。失败返回 -1，可立即调用 Windows 的 GetLastError 获取系统或 PDH 错误码。PDH 是 Windows 提供的性能计数器接口。</p>
+<h2>采样方式</h2>
+<p>每次同步采集两次计数器数据，中间等待约 200 毫秒，返回该时间窗口的平均占用率。实际调用耗时还包含计数器初始化和系统调度开销。忙碌时间按全部逻辑处理器归一化，包括多处理器组设备。</p>
+<p>各次调用、各线程拥有独立采样数据。调用线程会等待采样结束，适合在独立的监测线程中配合持续运行的 OCR、找图或 YOLO 观察负载。单次 OCR 完成后再调用，本次采样覆盖随后约 200 毫秒。</p>
+<h2>工作台完整调用实例</h2>
+<pre><code>// 加载 ZhaoTu.dll 后逐行输入，每次显示小数返回值和耗时。
+GetCpuUsage()
+GetGpuUsage()
+GetCpuUsage()</code></pre>
+<h2>C++ 完整调用实例</h2>
+<pre><code>// 配置 ZhaoTu.h 的包含目录，链接 ZhaoTu.lib，运行时加载配套 ZhaoTu.dll。
+#include "ZhaoTu.h"
+#include &lt;cstdio&gt;
+
+int main() {
+    for (int i = 0; i &lt; 5; ++i) {
+        const double cpu = GetCpuUsage();
+        const DWORD error = GetLastError();
+        if (cpu &lt; 0.0) {
+            std::printf("GetCpuUsage failed, error=0x%08lX\n", error);
+            return 1;
+        }
+        std::printf("CPU %.2f%%\n", cpu);
+        Sleep(800);
+    }
+    return 0;
+}</code></pre>
+<p>相关函数 <a href="Api-GetGpuUsage.html">GetGpuUsage</a>。两者各自按调用时间独立采样。</p>
+</body>
+</html>

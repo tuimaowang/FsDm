@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>SetCaptureFrameInterval - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="setcaptureframeinterval">SetCaptureFrameInterval</h1>
+<p>设置输入帧跳过数，或固定当前已发布快照。DX、OBS 按目标窗口的呈现计数，WGC 按帧池取出的输入帧计数。</p>
+<h2>函数原型</h2><pre><code>int WINAPI SetCaptureFrameInterval(int interval);</code></pre>
+<h2>参数与返回值</h2><p><code>interval=-1</code> 固定当前已发布快照并暂停发布新快照。后续找图、找色、OCR、CV 找图及其他读取共享采集帧的处理继续读取该快照；固定期间 GetFrameNumber 不递增。需要已有快照，否则返回 0 且设置不变。</p>
+<p><code>interval&gt;=0</code> 表示每次采集后跳过的输入帧数：0 为逐帧采集，1 为跳过 1 帧，2 为跳过 2 帧，以此类推。设置成功后从下一输入帧重新计数；传非负值会解除固定并恢复采集。小于 -1、未绑定或无效参数返回 0，原设置不变。成功返回 1；每次新绑定默认值为 0。</p>
+<h2>工作台示例</h2><pre><code>SetCaptureFrameInterval(-1)
+SetCaptureFrameInterval(0)
+SetCaptureFrameInterval(1)</code></pre>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#binding">SetCaptureFrameInterval 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

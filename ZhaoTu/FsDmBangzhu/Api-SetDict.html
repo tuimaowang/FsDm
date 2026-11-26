@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>SetDict - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="setdict">SetDict</h1>
+<p><strong>函数简介：</strong></p>
+<p>加载指定点阵字库，并将其设为当前字库。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI SetDict(int index, const char* file);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>index：字库编号，0～99。</li>
+<li>file：UTF-8 路径；字库文件内容支持 UTF-8 或 GB18030，格式要求见本页字库说明。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：加载并选中成功。</li>
+<li>0：编号、路径、编码、格式或容量不合法；替换失败保留旧字库。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+SetDict(0, &quot;C:\字库目录\ziku.txt&quot;)
+</code></pre>
+<p><strong>注意：</strong> 不会自动切换到 dict 引擎，需要 SetOcrEngine(&quot;dict&quot;)。不支持大漠加密字库的通用解密。</p>
+<p>如果字库文本已经在当前进程内存中，可用 <a href="Api-SetDictMemory.html#setdictmemory">SetDictMemory</a> 直接加载。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-dict">SetDict 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

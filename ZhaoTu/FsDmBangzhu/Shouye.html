@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>FsDm 找图接口帮助 - 快速入门</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;background:#fff;margin:28px 36px;max-width:980px}
+h1{font-size:28px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}
+h2{font-size:21px;color:#176a70;margin-top:30px}
+h3{font-size:17px;color:#285b74}
+p,li{line-height:1.8}a{color:#087b77}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:14px;overflow:auto}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace;color:#17465b}
+table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #d6e0e4;padding:8px 10px;text-align:left;vertical-align:top}th{background:#eaf2f2}
+.note{background:#fff7df;border-left:4px solid #d99a32;padding:10px 14px}.nav{color:#657681;font-size:13px}
+</style>
+</head>
+<body>
+<p class="nav">FsDm 帮助 &gt; 快速入门</p>
+<h1>FsDm 找图接口帮助</h1>
+<p>本帮助介绍 <code>ZhaoTu.dll</code> 导出的图片查找函数：<code>FindPic</code>、<code>FindPicS</code>、<code>FindPicEx</code> 和 <code>FindPicExS</code>，支持 BMP24、PNG、JPG/JPEG 文件模板，以及调用它们所需的路径、模板和结果管理接口。</p>
+
+<h2>最快调用流程</h2>
+<ol>
+<li>加载 <code>ZhaoTu.dll</code>，并从同一 DLL 取得查找与释放函数。</li>
+<li>窗口找图前，先用 <code>BindWindow</code> 绑定调用进程自己的窗口，并确认已有首帧。</li>
+<li>用 <code>SetPath</code> 指定图片模板所在目录；也可以传模板绝对路径。</li>
+<li>调用 <code>FindPic</code> 查找第一个位置，或调用 <code>FindPicEx</code> 查找全部位置。</li>
+<li>先检查返回指针和 <code>status</code>，再按 <code>count</code> 遍历 <code>items</code>。</li>
+<li>读取完成后调用 <code>FreeResult</code> 释放这一次的结果。</li>
+</ol>
+<p>各函数对应的端到端示例（包括必要设置、调用、读取结果与释放资源）见<a href="WanZhengDiaoyong.html">完整调用实例</a>。</p>
+
+<pre><code>const FsTongyongJieguo* r =
+    FindPic(0, 0, 1280, 720, "button.bmp", "000000", 0.9, 0);
+if (r != nullptr) {
+    if (r-&gt;status == FS_CHENGGONG &amp;&amp; r-&gt;count &gt; 0) {
+        const FsJieguoXiang&amp; hit = r-&gt;items[0];
+        // hit.x、hit.y 是模板左上角的客户区物理像素坐标
+    }
+    FreeResult(r);
+}</code></pre>
+
+<p><a href="MubanPipei.html">OpenCV 模板匹配</a>提供 CvFindPic 系列接口；<a href="AiJiance.html">AI 图像接口</a>说明 YOLO 目标检测函数。</p>
+<h2>函数导航</h2>
+<table>
+<tr><th>主题</th><th>内容</th></tr>
+<tr><td><a href="WanZhengDiaoyong.html#usage">CPU/GPU 占用率测试</a></td><td>GetCpuUsage、GetGpuUsage 的统计范围、采样方式及完整调用示例。</td></tr>
+<tr><td><a href="Jieguo.html">返回结果与错误判断</a></td><td>区分正常未命中、执行错误与内存分配失败；安全释放结果。</td></tr>
+<tr><td><a href="Muban.html">模板管理</a></td><td>SetPath、LoadPic、LoadPicByte、FreePic、MatchPicName。</td></tr>
+<tr><td><a href="FindPic.html">FindPic 系列函数</a></td><td>四个导出函数的完整原型、参数、BMP24 规则、方向和相似度。</td></tr>
+<tr><td><a href="CppDiaoyong.html">C++ 动态调用</a></td><td>LoadLibraryW、GetProcAddress 和统一结果的完整示例。</td></tr>
+</table>
+
+<h2 id="setpath">路径与字符串约定</h2>
+<p><code>SetPath(const char* path)</code> 设置相对模板路径的基础目录。字符串参数采用 UTF-8；Windows 路径请在 C++ 中使用双反斜杠或原始字符串。绝对路径不受 SetPath 影响。</p>
+<pre><code>SetPath("C:\\Users\\Administrator\\Documents\\DaMo\\FsDm");
+// 或：SetPath(R"(C:\Users\Administrator\Documents\DaMo\FsDm)");</code></pre>
+<p>区域坐标是客户区物理像素；找图区域的右下边界不包含在内。窗口外部截图或查找前应按实际窗口尺寸填写区域。</p>
+
+<h2 id="setfindbackend">选择 CPU 或 GPU</h2>
+<p><code>SetFindBackend("cpu")</code> 或 <code>SetFindBackend("gpu")</code> 选择找图执行方式，默认是 GPU。此设置可以在绑定期间更改，不会重启采集；GPU 不可用时不会自动退回 CPU。该选择与窗口采集方式独立。</p>
+<div class="note">本帮助只说明找图接口。采集后端、找色、OCR 等完整接口请查看项目中的《函数使用说明》。实际 C/C++ 声明以 <code>ZhaoTu\ZhaoTu.h</code> 和交付头文件为准。</div>
+</body>
+</html>

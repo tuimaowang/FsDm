@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>IsDisplayDead - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="isdisplaydead">IsDisplayDead</h1>
+<p><strong>函数简介：</strong> 判断指定客户区区域在指定时间内是否一直不变；检查到图像变化立即返回。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI IsDisplayDead(int x1, int y1, int x2, int y2, int t);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li><code>x1/y1</code>：区域左上角，客户区物理像素坐标。</li>
+<li><code>x2/y2</code>：区域右下角，不包含此边界；要求非空且整个区域在客户区内。</li>
+<li><code>t</code>：检测时长，单位为秒，必须大于等于 0。0 表示验证并读取一次有效区域。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li><code>0</code>：检测到变化；也用于非法参数、解绑/重绑、窗口销毁、尺寸变化或采集失败。</li>
+<li><code>1</code>：整个检测时段内没有检测到区域像素变化。</li>
+<li>区分正常变化与错误时，使用同线程 <code>GetFindStatus</code>：正常变化为 <code>FS_CHENGGONG</code>。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+IsDisplayDead(0, 0, 100, 100, 5)
+</code></pre>
+<p><strong>注意：</strong> 需先绑定并等待首帧。函数同步等待，期间该工作台不能接收下一条命令； 其他业务线程可以调用接口。每约 50ms 检查一次，不能保证发现两个检查之间短暂出现又消失的变化。 新快照也会比较实际 BGR 数据，不能把“快照编号在增加”当作画面变化；没有新快照时复用基准，不重复 CPU 读回。 取样区域保持原位，不进行找图、位移容错或临时文件保存，不改变 CPU/GPU 找图设置。 工作台分别显示采集取帧、区域整理及比较、检测等待和其他耗时。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#display-dead">IsDisplayDead 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>CaptureGif - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="capturegif">CaptureGif</h1>
+<p><strong>函数简介：</strong></p>
+<p>持续抓取指定区域并保存为 GIF，或保存单帧 GIF。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI CaptureGif(int x1, int y1, int x2, int y2, const char* file, int delay, int time);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>x1、y1：区域左上角坐标。</li>
+<li>x2、y2：区域右下角坐标，不包含右下边界；窗口接口使用客户区物理像素。</li>
+<li>file：输出 GIF 文件路径。</li>
+<li>delay：帧间隔，单位毫秒；0 表示单帧静态 GIF。</li>
+<li>time：录制总时长，单位毫秒；动画使用正值，静态可填 0。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：保存成功。</li>
+<li>0：参数、采集、编码或写入失败。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+CaptureGif(0, 0, 500, 500, &quot;screen.gif&quot;, 100, 3000)
+CaptureGif(0, 0, 500, 500, &quot;static.gif&quot;, 0, 0)
+</code></pre>
+<p><strong>注意：</strong> 调用期间同步等待，工作台会被录制占用。GIF 时间精度为 10 毫秒，实际间隔还受编码开销影响；期间解绑或尺寸改变会失败。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#capture">CaptureGif 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

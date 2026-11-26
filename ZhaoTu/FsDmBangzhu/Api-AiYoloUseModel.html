@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>AiYoloUseModel - FsDm 函数用法</title><style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}
+h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}
+h2{font-size:19px;color:#176a70;margin-top:28px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+table{border-collapse:collapse;width:100%;margin:10px 0}
+th,td{border:1px solid #d6e0e4;padding:7px 10px;text-align:left;vertical-align:top}th{background:#eaf2f2}
+</style></head><body>
+<p><a href="AiJiance.html">YOLO 接口总览</a> · <a href="WanZhengDiaoyong.html#yolo">工作台完整调用</a></p>
+<h1 id="aiyolousemodel">AiYoloUseModel</h1>
+<h2>函数简介</h2><p>选择后续 YOLO 检测和类别名称转换使用的模型编号。</p>
+<h2>函数原型</h2><pre><code>int WINAPI AiYoloUseModel(int index);</code></pre>
+<h2>参数定义</h2><table>
+<tr><th>参数</th><th>含义</th></tr>
+<tr><td><code>index</code></td><td>已通过文件版或内存版成功登记的模型编号，0～19。</td></tr>
+</table>
+<h2>返回值与结果处理</h2><ul>
+<li>1 表示选择成功。</li>
+<li>0 表示编号越界或该编号尚未加载模型。此函数失败时没有更新 GetOcrError 的诊断信息。</li>
+</ul>
+<h2>作用范围与调用说明</h2><ul>
+<li>模型表、版本设置和当前选中编号在当前进程的这一个 ZhaoTu.dll 实例内跨线程共享。多个线程共用当前模型选择，已经取得模型引用的检测可继续使用该次取得的模型。</li>
+<li>当前选择编号初始为 0，使用其他编号时应显式选择。模型登记和模型选择分别通过 SetModel 与 UseModel 完成。</li>
+<li>AiYoloObjectsToString 使用调用时选中的模型类别表，处理已有检测字符串时应保持对应模型被选中。</li>
+</ul>
+<h2>完整 C++ 调用示例</h2>
+<p>路径使用本项目 Release 目录附带的 FP32 模型，按实际文件位置和窗口区域调整。本例独占绑定和全量结果释放时机，调用方须在目标窗口所属进程中运行。</p>
+<pre class="cpp"><code>#include &quot;FsDmJiekou.h&quot;
+#include &lt;cstdio&gt;
+
+// 在目标窗口所属进程调用，hwnd 为实际窗口句柄。
+// 包含 FsDmJiekou.h，链接 ZhaoTu.lib，并部署配套 DLL 与模型。
+bool CeshiAiYoloUseModel(HWND hwnd) {
+    if (!AiYoloSetVersion(&quot;v5-7.0&quot;)) return false;
+    if (!AiYoloSetModel(0, R&quot;(C:\Users\Administrator\Documents\DaMo\FsDm\out\build\bin\Release\YoloMoxing\yolov5n.onnx)&quot;, &quot;&quot;)) {
+        std::printf(&quot;%s\n&quot;, GetOcrError());
+        FreeAllStringResults();
+        return false;
+    }
+    if (!AiYoloUseModel(0)) {
+        AiYoloFreeModel(0);
+        return false;
+    }
+    if (!BindWindow(hwnd, &quot;dx&quot;, &quot;normal&quot;, &quot;normal&quot;, 0)) {
+        AiYoloFreeModel(0);
+        return false;
+    }
+    // 绑定成功后等待首张可用快照，最多约一秒。
+    bool ready = false;
+    for (int attempt = 0; attempt &lt; 100; ++attempt) {
+        FsZhuangtai state{};
+        state.size = sizeof(state);
+        if (GetStatus(&amp;state) == FS_CHENGGONG &amp;&amp; state.result == FS_CHENGGONG
+            &amp;&amp; state.bound &amp;&amp; state.hasFrame) {
+            ready = true;
+            break;
+        }
+        Sleep(10);
+    }
+    bool ok = false;
+    if (ready) {
+        const char* objects = AiYoloDetectObjects(0, 0, 834, 419, 0.5, 0.45);
+        // 立即读取本线程检测诊断，避免后续调用覆盖诊断。
+        const char* error = GetOcrError();
+        if (objects &amp;&amp; error &amp;&amp; *error == &#x27;\0&#x27;) {
+            std::printf(&quot;objects=%s\n&quot;, objects);
+            ok = true;
+        } else {
+            std::printf(&quot;%s\n&quot;, error ? error : &quot;结果内存分配失败&quot;);
+        }
+    }
+    // 本例全部结果读取结束后统一释放。
+    FreeAllStringResults();
+    UnBindWindow();
+    const bool freed = AiYoloFreeModel(0) == 1;
+    return ok &amp;&amp; freed;
+}</code></pre>
+<p><a href="WanZhengDiaoyong.html#yolo">工作台逐行输入示例、返回值检查和模型要求</a>。</p>
+</body></html>

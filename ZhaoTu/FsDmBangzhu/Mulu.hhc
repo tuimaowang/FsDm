@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN"><HTML><HEAD></HEAD><BODY>
+<OBJECT type="text/site properties"><param name="Window Styles" value="0x800025"><param name="Font" value="Microsoft YaHei UI,10,0"></OBJECT><UL>
+ <LI><OBJECT type="text/sitemap"><param name="Name" value="FsDm 函数用法"><param name="Local" value="Jichu.html"></OBJECT><UL>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="图色与采集"></OBJECT><UL>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="BindWindow"><param name="Local" value="Api-BindWindow.html#bindwindow"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="UnBindWindow"><param name="Local" value="Api-UnBindWindow.html#unbindwindow"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetCaptureFrameInterval"><param name="Local" value="Api-SetCaptureFrameInterval.html#setcaptureframeinterval"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetFrameResultCache"><param name="Local" value="Api-SetFrameResultCache.html#setframeresultcache"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetPath"><param name="Local" value="Api-SetPath.html#setpath"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetFindBackend"><param name="Local" value="Api-SetFindBackend.html#setfindbackend"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetFindStatus"><param name="Local" value="Api-GetFindStatus.html#getfindstatus"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Capture"><param name="Local" value="Api-Capture.html#capture"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="CaptureJpg"><param name="Local" value="Api-CaptureJpg.html#capturejpg"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="CapturePng"><param name="Local" value="Api-CapturePng.html#capturepng"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="CaptureGif"><param name="Local" value="Api-CaptureGif.html#capturegif"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetStatus"><param name="Local" value="Api-GetStatus.html#getstatus"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IsDisplayDead"><param name="Local" value="Api-IsDisplayDead.html#isdisplaydead"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FreeResult"><param name="Local" value="Api-FreeResult.html#freeresult"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FreeAllResults"><param name="Local" value="Api-FreeAllResults.html#freeallresults"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FreeAllStringResults"><param name="Local" value="Api-FreeAllStringResults.html#freeallstringresults"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="LoadPic"><param name="Local" value="Api-LoadPic.html#loadpic"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="LoadPicByte"><param name="Local" value="Api-LoadPicByte.html#loadpicbyte"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FreePic"><param name="Local" value="Api-FreePic.html#freepic"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MatchPicName"><param name="Local" value="Api-MatchPicName.html#matchpicname"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindPic"><param name="Local" value="Api-FindPic.html#findpic"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindPicS"><param name="Local" value="Api-FindPicS.html#findpics"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindPicEx"><param name="Local" value="Api-FindPicEx.html#findpicex"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindPicExS"><param name="Local" value="Api-FindPicExS.html#findpicexs"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="CvFindPic"><param name="Local" value="MubanPipei.html#cvfindpic"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="CvFindPicEx"><param name="Local" value="MubanPipei.html#cvfindpicex"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="CvFindPicMem"><param name="Local" value="MubanPipei.html#cvfindpicmem"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="CvFindPicMemEx"><param name="Local" value="MubanPipei.html#cvfindpicmemex"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloSetVersion"><param name="Local" value="Api-AiYoloSetVersion.html#aiyolosetversion"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloSetModel"><param name="Local" value="Api-AiYoloSetModel.html#aiyolosetmodel"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloSetModelMemory"><param name="Local" value="Api-AiYoloSetModelMemory.html#aiyolosetmodelmemory"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloUseModel"><param name="Local" value="Api-AiYoloUseModel.html#aiyolousemodel"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloFreeModel"><param name="Local" value="Api-AiYoloFreeModel.html#aiyolofreemodel"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloDetectObjects"><param name="Local" value="Api-AiYoloDetectObjects.html#aiyolodetectobjects"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloDetectObjectsToFile"><param name="Local" value="Api-AiYoloDetectObjectsToFile.html#aiyolodetectobjectstofile"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloDetectObjectsToDataBmp"><param name="Local" value="Api-AiYoloDetectObjectsToDataBmp.html#aiyolodetectobjectstodatabmp"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloSortsObjects"><param name="Local" value="Api-AiYoloSortsObjects.html#aiyolosortsobjects"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AiYoloObjectsToString"><param name="Local" value="Api-AiYoloObjectsToString.html#aiyoloobjectstostring"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetColor"><param name="Local" value="Api-GetColor.html#getcolor"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="CmpColor"><param name="Local" value="Api-CmpColor.html#cmpcolor"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindColor"><param name="Local" value="Api-FindColor.html#findcolor"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindColorEx"><param name="Local" value="Api-FindColorEx.html#findcolorex"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindMultiColor"><param name="Local" value="Api-FindMultiColor.html#findmulticolor"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindMultiColorEx"><param name="Local" value="Api-FindMultiColorEx.html#findmulticolorex"></OBJECT></LI>
+  </UL></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="文字识别"></OBJECT><UL>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetOcrModel"><param name="Local" value="Api-SetOcrModel.html#setocrmodel"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetOcrModelFiles"><param name="Local" value="Api-SetOcrModelFiles.html#setocrmodelfiles"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="UseOcrModel"><param name="Local" value="Api-UseOcrModel.html#useocrmodel"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FreeOcrModel"><param name="Local" value="Api-FreeOcrModel.html#freeocrmodel"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetOcrBackend"><param name="Local" value="Api-SetOcrBackend.html#setocrbackend"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetOcrEngine"><param name="Local" value="Api-SetOcrEngine.html#setocrengine"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetDict"><param name="Local" value="Api-SetDict.html#setdict"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SetDictMemory"><param name="Local" value="Api-SetDictMemory.html#setdictmemory"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="UseDict"><param name="Local" value="Api-UseDict.html#usedict"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetNowDict"><param name="Local" value="Api-GetNowDict.html#getnowdict"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetDictCount"><param name="Local" value="Api-GetDictCount.html#getdictcount"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ClearDict"><param name="Local" value="Api-ClearDict.html#cleardict"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Ocr"><param name="Local" value="Api-Ocr.html#ocr"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="OcrEx"><param name="Local" value="Api-OcrEx.html#ocrex"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="OcrExOne"><param name="Local" value="Api-OcrExOne.html#ocrexone"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="OcrInFile"><param name="Local" value="Api-OcrInFile.html#ocrinfile"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindStr"><param name="Local" value="Api-FindStr.html#findstr"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindStrS"><param name="Local" value="Api-FindStrS.html#findstrs"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindStrEx"><param name="Local" value="Api-FindStrEx.html#findstrex"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindStrExS"><param name="Local" value="Api-FindStrExS.html#findstrexs"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindStrFast"><param name="Local" value="Api-FindStrFast.html#findstrfast"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindStrFastS"><param name="Local" value="Api-FindStrFastS.html#findstrfasts"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindStrFastEx"><param name="Local" value="Api-FindStrFastEx.html#findstrfastex"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FindStrFastExS"><param name="Local" value="Api-FindStrFastExS.html#findstrfastexs"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetOcrError"><param name="Local" value="Api-GetOcrError.html#getocrerror"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetOcrStatus"><param name="Local" value="Api-GetOcrStatus.html#getocrstatus"></OBJECT></LI>
+  </UL></LI>
+ <LI><OBJECT type="text/sitemap"><param name="Name" value="调试函数"></OBJECT><UL>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetFrameNumber"><param name="Local" value="Api-GetFrameNumber.html#getframenumber"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetCpuUsage"><param name="Local" value="Api-GetCpuUsage.html#getcpuusage"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="GetGpuUsage"><param name="Local" value="Api-GetGpuUsage.html#getgpuusage"></OBJECT></LI>
+ </UL></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="结构体"></OBJECT><UL>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="公共结构体说明"><param name="Local" value="Jiegouti.html"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FsZhuangtai"><param name="Local" value="Jiegouti-FsZhuangtai.html"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FsChazhaoZhuangtai"><param name="Local" value="Jiegouti-FsChazhaoZhuangtai.html"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FsOcrZhuangtai"><param name="Local" value="Jiegouti-FsOcrZhuangtai.html"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FsTongyongJieguo"><param name="Local" value="Jiegouti-FsTongyongJieguo.html"></OBJECT></LI>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="FsJieguoXiang"><param name="Local" value="Jiegouti-FsJieguoXiang.html"></OBJECT></LI>
+  </UL></LI>
+   <LI><OBJECT type="text/sitemap"><param name="Name" value="完整调用实例"><param name="Local" value="WanZhengDiaoyong.html"></OBJECT></LI>
+</UL></LI></UL></BODY></HTML>

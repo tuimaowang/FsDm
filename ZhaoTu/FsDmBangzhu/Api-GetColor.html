@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>GetColor - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="getcolor">GetColor</h1>
+<p><strong>函数简介：</strong></p>
+<p>获取指定坐标的 RGB 整数值。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+const FsTongyongJieguo* WINAPI GetColor(int x, int y);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>x：客户区 X 坐标。</li>
+<li>y：客户区 Y 坐标。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>返回独立的 <code>FsTongyongJieguo</code> 指针。<code>status=0</code> 正常，<code>count=0</code> 无命中；错误为非 0 状态，分配失败为 <code>nullptr</code>。</li>
+<li>成功时 count=1；条目提供 x、y、color。</li>
+<li>条目有效字段标志：<code>FS_JG_XY | FS_JG_COLOR</code>；用完后通过 DLL 释放。fullText 为空字符串。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+GetColor(30, 30)
+</code></pre>
+<p><strong>注意：</strong> 负坐标归零，正向越界为参数错误。color 是整数 RGB，例如 0x12f3f3，黑色 0x000000 也是有效值。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#color">GetColor 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

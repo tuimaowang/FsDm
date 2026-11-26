@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>返回结果与错误判断</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:28px 36px;max-width:980px}
+h1{font-size:26px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}h2{font-size:20px;color:#176a70;margin-top:26px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:14px;overflow:auto}code{font-family:Consolas,monospace}
+table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #d6e0e4;padding:8px 10px;text-align:left;vertical-align:top}th{background:#eaf2f2}.note{background:#fff7df;border-left:4px solid #d99a32;padding:10px 14px}
+</style>
+</head>
+<body>
+<p>FsDm 找图帮助 &gt; 结果</p>
+<h1>返回结果与错误判断</h1>
+<p>四个 FindPic 函数都返回 <code>const FsTongyongJieguo*</code>。结果对象和其内部数组由 DLL 分配；调用方只能读取，不能自行 <code>delete</code> 或 <code>free</code>。</p>
+
+<h2>三个必须区分的状态</h2>
+<table>
+<tr><th>返回情况</th><th>含义</th><th>调用方处理</th></tr>
+<tr><td>结果指针为 <code>nullptr</code></td><td>DLL 无法分配结果对象。</td><td>不能读取字段；记录本次失败。</td></tr>
+<tr><td><code>r-&gt;status == FS_CHENGGONG</code> 且 <code>count == 0</code></td><td>查找正常完成，但没有匹配。</td><td>这是正常未命中，不是接口错误。</td></tr>
+<tr><td><code>r-&gt;status != FS_CHENGGONG</code></td><td>参数、绑定、采集、模板加载等执行失败。</td><td>记录 <code>status</code> 和 <code>detail</code>；不要把它当作无匹配。</td></tr>
+<tr><td><code>r-&gt;status == FS_CHENGGONG</code> 且 <code>count &gt; 0</code></td><td>查找成功并命中。</td><td>仅遍历 <code>[0, count)</code> 内的条目。</td></tr>
+</table>
+
+<h2>找图条目</h2>
+<p>每项 <code>FsJieguoXiang</code> 的有效字段为 <code>FS_JG_ID | FS_JG_XY | FS_JG_FILE</code>：</p>
+<ul>
+<li><code>id</code>：模板在输入列表中的从零开始索引。第一张模板的 id 是 0，不代表失败。</li>
+<li><code>x, y</code>：命中模板左上角的客户区物理像素位置。</li>
+<li><code>file</code>：命中模板名称，以 UTF-8 字符串读取。</li>
+<li><code>fields</code>：字段有效标志；用按位检查判断字段是否有效。</li>
+</ul>
+<p><code>FsTongyongJieguo</code> 还包含 <code>size</code>、<code>version</code>、<code>status</code>、<code>detail</code>、<code>count</code>、<code>items</code> 和 <code>fullText</code>。找图不使用全文字段。</p>
+<p>所有结果结构、字段有效标志及其他找图诊断结构的字段说明，见<a href="Jiegouti.html">结构体目录</a>。</p>
+
+<h2 id="freeresult">释放结果</h2>
+<pre><code>const FsTongyongJieguo* r = FindPic(...);
+if (r != nullptr) {
+    // 必须先读取并处理 r 及 r-&gt;items。
+    FreeResult(r);
+    r = nullptr;
+}</code></pre>
+<p><code>FreeResult</code> 只释放传入的这一项结果及其条目、字符串；空指针成功，未知地址或重复释放返回 0。释放后，<code>r</code>、<code>items</code> 和条目中的文字指针全部失效。</p>
+<p>如果要全量释放所有线程未释放的通用识别结果，可以调用 <code>FreeAllResults()</code>。全量释放前必须确保没有线程仍在读取这些结果。找图模板另由 <code>FreePic</code> 管理，两类资源不能混淆。</p>
+
+<h2>常见 status</h2>
+<table>
+<tr><th>状态码</th><th>常量</th><th>常见原因</th></tr>
+<tr><td>0</td><td>FS_CHENGGONG</td><td>调用正常；继续查看 count 判断命中与否。</td></tr>
+<tr><td>1</td><td>FS_WEIBANGDING</td><td>没有绑定窗口或绑定已失效。</td></tr>
+<tr><td>2</td><td>FS_DENGDAISHOUZHEN</td><td>绑定已完成，但还没有第一帧。</td></tr>
+<tr><td>4</td><td>FS_CANSHU_CUOWU</td><td>参数、坐标、名称或方向不合法。</td></tr>
+<tr><td>8</td><td>FS_CAIJI_SHIBAI</td><td>采集或像素读取失败。</td></tr>
+<tr><td>9</td><td>FS_JIAZAI_SHIBAI</td><td>所有模板均不可加载，或 BMP 内容无效。</td></tr>
+<tr><td>12</td><td>FS_ZIYUAN_MANG</td><td>缓存、GPU 或候选等资源暂时不足。</td></tr>
+</table>
+<div class="note">完整状态定义见 <code>Gonggong\Jiekou.h</code> 中的 <code>enum FsJieguo</code>。<code>detail</code> 是补充诊断值；只有在相应失败状态下才结合它定位底层原因。</div>
+</body>
+</html>

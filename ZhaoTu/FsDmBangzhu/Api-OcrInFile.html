@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>OcrInFile - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="ocrinfile">OcrInFile</h1>
+<p><strong>函数简介：</strong></p>
+<p>读取 pic_name 指定的图片文件，识别图片中指定区域的文字，无需绑定窗口。通过 fullText 返回全文，通过 items 返回逐字符坐标，坐标相对于原图片左上角。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+const FsTongyongJieguo* WINAPI OcrInFile(int x1, int y1, int x2, int y2, const char* pic_name, const char* color_format, double sim);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>x1、y1：图片区域左上角像素坐标。</li>
+<li>x2、y2：图片区域右下角像素坐标，不包含右下边界。</li>
+<li>pic_name：图片文件路径，按 SetPath 解析相对路径。</li>
+<li>color_format：文字颜色过滤规则，同 Ocr。RGB 使用六位十六进制，HSV 使用 <code>H.S.V</code>，灰度使用 <code>#灰度-偏差</code>；多个颜色用 <code>|</code> 分隔，前缀 <code>b@</code> 表示背景模式。传入 <code>&quot;&quot;</code> 时，model 引擎保留原图自动识别，dict 引擎自动进行黑白分割并判断背景明暗。</li>
+<li>sim：识别阈值，同 Ocr。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>返回独立的 <code>FsTongyongJieguo</code> 指针。<code>status=0</code> 正常，<code>count=0</code> 无命中；错误为非 0 状态，分配失败为 <code>nullptr</code>。</li>
+<li>fullText 提供全文；items 按识别顺序提供字符序号 id、坐标 x/y 和字符 text。</li>
+<li>条目有效字段标志：<code>FS_JG_ID | FS_JG_XY | FS_JG_TEXT</code>；用完后通过 DLL 释放。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+OcrInFile(0, 0, 834, 419, &quot;screen.bmp&quot;, &quot;&quot;, 0.5)
+</code></pre>
+<p><strong>注意：</strong> 无需绑定窗口；坐标相对于图片，区域须按文件尺寸填写。采用当前模型、字库和 OCR 后端，不能用内存模板别名替代图片文件。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#capture">OcrInFile 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

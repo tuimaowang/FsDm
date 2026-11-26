@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>CopyFrame - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="copyframe">CopyFrame</h1>
+<p><strong>函数简介：</strong></p>
+<p>按需把最新 GPU 快照读取为 CPU BGRA，并复制到调用方缓冲区。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI CopyFrame(void* pixels, uint64_t capacity, FsZhen* frame);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>pixels：调用方 CPU 缓冲区；查询容量时可为 nullptr。</li>
+<li>capacity：缓冲区容量，单位字节；查询时填 0。</li>
+<li>frame：FsZhen 输入输出结构，调用前设置 size=sizeof(FsZhen)。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>0：成功复制一帧。</li>
+<li>3（FS_HUANCHONG_BUZU）：容量不足，通过 frame.requiredBytes 获取所需容量。</li>
+<li>其他值：未绑定、等待首帧、参数错误或采集失败等，见状态码表。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+// C++ 调用；工作台不支持此缓冲区接口。
+FsZhen f{};
+f.size = sizeof(f);
+int ret = CopyFrame(nullptr, 0, &amp;f);
+if (ret == FS_HUANCHONG_BUZU) {
+    std::vector&lt;unsigned char&gt; pixels(f.requiredBytes);
+    ret = CopyFrame(pixels.data(), pixels.size(), &amp;f);
+    // 仅 ret == FS_CHENGGONG 才能使用本次像素。
+    // 尺寸若改变导致容量仍不足，应重新分配并重试。
+}
+</code></pre>
+<p><strong>注意：</strong> 示例需包含 &lt;vector&gt;。输出从上到下、每行 width&#215;4 字节、紧密排列 BGRA；最大 16,777,216 像素。容量查询和容量不足不会读回。暂停呈现保留最新帧，可比较 frameNumber。</p>
+
+</body></html>

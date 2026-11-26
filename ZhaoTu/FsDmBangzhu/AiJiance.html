@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>AI 图像接口与 YOLO</title><style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}
+h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}
+h2{font-size:19px;color:#176a70;margin-top:28px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+table{border-collapse:collapse;width:100%;margin:10px 0}
+th,td{border:1px solid #d6e0e4;padding:7px 10px;text-align:left;vertical-align:top}th{background:#eaf2f2}
+</style></head><body>
+<h1>AI 图像接口与 YOLO</h1>
+<p>YOLO 接口用于模型目标检测。以下每个函数均有独立的参数、返回值、作用范围和完整 C++ 调用示例。<a href="WanZhengDiaoyong.html#yolo">工作台完整调用示例</a>可逐行测试加载、检测和保存结果。</p>
+<table><tr><th>函数</th><th>用途</th></tr><tr><td><a href="Api-AiYoloSetVersion.html#aiyolosetversion">AiYoloSetVersion</a></td><td>设置后续 YOLO 检测使用的模型解析格式。当前可传入的版本字符串为 &quot;v5-7.0&quot;。</td></tr><tr><td><a href="Api-AiYoloSetModel.html#aiyolosetmodel">AiYoloSetModel</a></td><td>从 ONNX 文件加载并校验模型，建立 CPU 推理会话，将模型登记到指定编号。</td></tr><tr><td><a href="Api-AiYoloSetModelMemory.html#aiyolosetmodelmemory">AiYoloSetModelMemory</a></td><td>复制调用方内存中的完整 ONNX 文件字节，建立 CPU 推理会话并登记模型。</td></tr><tr><td><a href="Api-AiYoloUseModel.html#aiyolousemodel">AiYoloUseModel</a></td><td>选择后续 YOLO 检测和类别名称转换使用的模型编号。</td></tr><tr><td><a href="Api-AiYoloFreeModel.html#aiyolofreemodel">AiYoloFreeModel</a></td><td>释放指定编号持有的 YOLO 模型，回收该编号的模型引用。</td></tr><tr><td><a href="Api-AiYoloDetectObjects.html#aiyolodetectobjects">AiYoloDetectObjects</a></td><td>检测已绑定窗口指定区域中的目标，返回类别、置信度和检测框坐标组成的字符串。</td></tr><tr><td><a href="Api-AiYoloDetectObjectsToFile.html#aiyolodetectobjectstofile">AiYoloDetectObjectsToFile</a></td><td>检测窗口区域，并将该区域及红色检测框标注保存为 BMP 文件。</td></tr><tr><td><a href="Api-AiYoloDetectObjectsToDataBmp.html#aiyolodetectobjectstodatabmp">AiYoloDetectObjectsToDataBmp</a></td><td>检测窗口区域，将带检测框标注的完整 BMP 文件字节写入调用方缓冲区。</td></tr><tr><td><a href="Api-AiYoloSortsObjects.html#aiyolosortsobjects">AiYoloSortsObjects</a></td><td>对检测字符串中的目标按分行规则和横坐标重新排序，保留每个目标原有字段。</td></tr><tr><td><a href="Api-AiYoloObjectsToString.html#aiyoloobjectstostring">AiYoloObjectsToString</a></td><td>把检测字符串中的类别编号映射为当前选中模型的类别名，返回以 | 分隔的名称列表。</td></tr></table>
+<h2 id="version">YOLO 版本及模型要求</h2>
+<ul>
+<li>调用顺序为设置版本、登记模型、选择模型、绑定并等待首帧、检测、读取并释放结果、解绑和释放模型。</li>
+<li>当前版本参数为 <code>"v5-7.0"</code>。模型为单输入、单输出 ONNX，实际推理输入为 float32 的 <code>[1,3,640,640]</code>，即单张 RGB 图片、三个颜色通道、640×640 像素。兼容模型可使用动态输入维度，实际执行仍使用该输入形状。</li>
+<li>输出为 float32 的 <code>[1,N,5+类别数]</code>，N 为候选框数量，每项为中心 x、中心 y、宽、高、目标存在分数及各类别分数。框坐标以 640×640 输入像素计。类别维度须能在加载时确定。</li>
+<li>文件模型为 <code>.onnx</code>，旁边放置同名 UTF-8 <code>.class</code>，每个非空行对应一个类别，首行编号为 0，类别数量须匹配输出。文件与内存模型大小均不超过 512 MiB，password 传空字符串。</li>
+<li>项目附带 <code>YoloMoxing/yolov5n.onnx</code> 和 <code>yolov5n.class</code> 可试跑，使用 FP32 模型。模型表、版本和选中编号在当前进程的 DLL 内跨线程共享，编号范围为 0～19。</li>
+<li>预处理、ONNX 推理、重叠框过滤和 BMP 标注均在 CPU 执行。DX、OBS、WGC 的窗口采集仍由绑定的后端提供。</li>
+</ul>
+<h2 id="detect">检测、结果与同帧复用</h2>
+<ul>
+<li>调用前成功绑定目标窗口、等待首帧，并调用 AiYoloSetVersion、AiYoloSetModel（或内存版）、AiYoloUseModel。当前 ONNX 推理、预处理和重叠框过滤均在 CPU 执行。</li>
+<li>区域先从共享的完整采集帧中裁剪，再按比例缩放并补边为 640×640，转换为 RGB 浮点输入。结果坐标映射回客户区，包含检测区域的 x1、y1 偏移。</li>
+<li>三个检测入口共用检测结果缓存，缓存保存已经算出的检测框和对应区域图像。同一绑定、同一帧、同一模型及相同区域、prob、iou 且缓存仍保留时，复用结果并跳过取图、预处理和模型推理。</li>
+<li>SetFrameResultCache(0) 允许复用结果，为默认行为。SetFrameResultCache(1) 强制每次执行分析。此开关在 DLL 内全局共享，同帧像素仍可由帧缓存复用。缓存有容量限制，被淘汰的结果会重新计算。</li>
+<li>SetCaptureFrameInterval(-1) 固定已发布的采集快照，SetCaptureFrameInterval(0) 恢复无间隔采集。固定帧和复用结果分别由采集设置和结果缓存开关控制。</li>
+</ul>
+<p>检测结果示例 <code>0,0.920000,100,80,60,120|2,0.850000,220,90,80,50</code>。每项为类别编号、置信度、客户区左上角 x、y、宽、高。类别名由 <code>AiYoloObjectsToString</code> 转换，例如 <code>person|car</code>。</p>
+<p><code>AiYoloSortsObjects(objects, 0)</code> 将全部条目按 x 升序排序。height 大于 0 时先根据 y 与行首 y 的差分行，再在每行内按 x 排序。</p>
+<p>文件版和内存版输出图片内容为裁剪后的检测区域，格式为 24 位 BMP。mode 为 0 时标注类别编号和置信度，为 1 时仅标注类别编号。</p>
+<h2>失败排查与内存释放</h2>
+<p>加载模型和三个检测入口失败后，可立即在同线程调用 <code>GetOcrError()</code>。检测返回空字符串时也应读取此诊断，成功无目标时诊断为空。设置版本、选择模型、释放模型、排序和名称转换函数没有更新该诊断，检查各自返回值。</p>
+<p>返回值为 DLL 分配的独立 UTF-8 字符串，分配失败可能返回 nullptr。使用完后调用 FreeAllStringResults() 或 FreeAllResults()。全量释放会同时回收其他线程持有的字符串和通用结果，调用前须完成所有结果读取。工作台会自动显示并释放本次字符串结果。</p>
+</body></html>

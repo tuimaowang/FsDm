@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>UseOcrModel - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="useocrmodel">UseOcrModel</h1>
+<p><strong>函数简介：</strong></p>
+<p>选择后续模型 OCR 使用的模型编号。此设置在当前进程的 ZhaoTu.dll 实例内全局共享。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI UseOcrModel(int index);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>index：已登记的模型编号，0～99。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：选择成功。</li>
+<li>0：编号无效、未登记或默认模型登记失败。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+UseOcrModel(0)
+</code></pre>
+<h2>作用范围</h2>
+<p><code>UseOcrModel(index)</code> 修改的是当前进程中这一个 <code>ZhaoTu.dll</code> 实例共享的模型编号，不是每个线程各自独立的设置，也不是整台计算机的系统级设置。任一线程调用后，所有线程随后开始的 model 引擎 OCR 都使用新选择的模型；已经开始的识别沿用该次调用开始时取得的设置。多个线程若需要不同模型，不应并发切换后再依赖各自独立选择。</p>
+<p>此函数只选择已登记的模型，不负责登记模型或选择 OCR 引擎。默认模型编号为 0，资源来自 <code>ZhaoTu.dll</code> 同目录的 <code>ocr_models</code>；要使用其他模型，先调用 <code>SetOcrModel</code> 或 <code>SetOcrModelFiles</code>。如果当前引擎为 <code>dict</code>，调用本函数不会自动切换引擎，需另行调用 <code>SetOcrEngine("model")</code>。</p>
+<h2>完整 OCR 调用示例</h2>
+<p>以下示例使用 <code>models10</code> 英文模型。请把路径和 <code>hwnd</code> 替换为本机模型文件与目标窗口句柄。窗口 OCR 前须成功绑定；若此前已经绑定，可省略 <code>BindWindow</code>。</p>
+<pre><code>SetOcrModelFiles(1,
+    "C:\\Users\\Administrator\\Documents\\DaMo\\ocr_model\\models10\\cls.onnx",
+    "C:\\Users\\Administrator\\Documents\\DaMo\\ocr_model\\models10\\detEN.onnx",
+    "C:\\Users\\Administrator\\Documents\\DaMo\\ocr_model\\models10\\RecEN.onnx",
+    "C:\\Users\\Administrator\\Documents\\DaMo\\ocr_model\\models10\\KeysEN.txt");
+UseOcrModel(1);
+SetOcrEngine("model");
+SetOcrBackend("cpu");
+BindWindow(hwnd, "dx", "normal", "normal", 0);
+
+const FsTongyongJieguo* result = OcrEx(0, 0, 834, 419, "", 0.5);
+if (result != nullptr) {
+    if (result-&gt;status == FS_CHENGGONG) {
+        const char* fullText = result-&gt;fullText;
+        for (uint32_t i = 0; i &lt; result-&gt;count; ++i) {
+            const FsJieguoXiang&amp; item = result-&gt;items[i];
+            // item.text 为 UTF-8 单字符，item.x/item.y 为字符位置。
+        }
+        // 在此处理 fullText 和字符条目。
+    }
+    FreeResult(result);
+}</code></pre>
+<p><strong>调用顺序：</strong> 先登记模型，再选择模型、设置 model 引擎和推理后端；绑定窗口后调用 <code>OcrEx</code>。检查 <code>status</code> 后读取 <code>fullText</code> 或 <code>items</code>，读取完成再调用 <code>FreeResult</code>；释放后不能继续访问结果及其内部指针。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-model">UseOcrModel 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

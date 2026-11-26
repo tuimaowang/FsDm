@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>FindPic 系列图片查找接口</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:28px 36px;max-width:980px}
+h1{font-size:26px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}h2{font-size:20px;color:#176a70;margin-top:27px}h3{font-size:17px;color:#285b74}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:14px;overflow:auto}code{font-family:Consolas,monospace}
+table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #d6e0e4;padding:8px 10px;text-align:left;vertical-align:top}th{background:#eaf2f2}.note{background:#fff7df;border-left:4px solid #d99a32;padding:10px 14px}
+</style>
+</head>
+<body>
+<p>FsDm 找图帮助 &gt; FindPic</p>
+<h1>FindPic 系列函数</h1>
+<h2>四个导出函数</h2>
+<pre><code>const FsTongyongJieguo* WINAPI FindPic(
+    int x1, int y1, int x2, int y2,
+    const char* pic_name, const char* delta_color,
+    double sim, int dir);
+
+const FsTongyongJieguo* WINAPI FindPicS(
+    int x1, int y1, int x2, int y2,
+    const char* pic_name, const char* delta_color,
+    double sim, int dir);
+
+const FsTongyongJieguo* WINAPI FindPicEx(
+    int x1, int y1, int x2, int y2,
+    const char* pic_name, const char* delta_color,
+    double sim, int dir);
+
+const FsTongyongJieguo* WINAPI FindPicExS(
+    int x1, int y1, int x2, int y2,
+    const char* pic_name, const char* delta_color,
+    double sim, int dir);</code></pre>
+<table>
+<tr><th>函数</th><th>结果数量</th><th>用途</th></tr>
+<tr><td><code>FindPic</code></td><td>0 或 1</td><td>返回输入模板列表中优先模板的第一个命中。</td></tr>
+<tr><td><code>FindPicS</code></td><td>0 或 1</td><td>与 FindPic 使用相同结果结构，保留名称以兼容旧调用代码。</td></tr>
+<tr><td><code>FindPicEx</code></td><td>0～1500</td><td>返回全部命中；先返回第一张模板的命中，再处理下一张。</td></tr>
+<tr><td><code>FindPicExS</code></td><td>0～1500</td><td>与 FindPicEx 使用相同结果结构，保留名称以兼容旧调用代码。</td></tr>
+</table>
+
+<h2>参数</h2>
+<table>
+<tr><th>参数</th><th>说明</th></tr>
+<tr><td><code>x1, y1</code></td><td>查找区域左上角。</td></tr>
+<tr><td><code>x2, y2</code></td><td>查找区域右下边界，不包含该边界。窗口查找采用客户区物理像素坐标。</td></tr>
+<tr><td><code>pic_name</code></td><td>一个或多个 BMP24、PNG 或 JPG/JPEG 文件名，以 <code>|</code> 分隔；可使用文件路径或已由 LoadPicByte 加载的内存模板别名。列表索引从 0 开始。</td></tr>
+<tr><td><code>delta_color</code></td><td>六位十六进制 RGB 通道偏色容差，例如 <code>"203040"</code>；<code>"000000"</code> 表示不增加额外容差。</td></tr>
+<tr><td><code>sim</code></td><td>合法范围为 0.1～1.0。它不是命中像素百分比；特定离散值增加各 RGB 通道容差。</td></tr>
+<tr><td><code>dir</code></td><td>扫描方向，找图只支持 0～3。</td></tr>
+</table>
+
+<h2 id="sim">相似度与容差</h2>
+<p>BMP24 四角同色的模板像素按透明色忽略；整张模板同色时例外，按不透明图比较。PNG 的完全透明像素跳过，半透明像素按解码后的 RGB 比较；JPG/JPEG 按不透明图处理。模板尺寸不会自动缩放。匹配时对所有有效、非透明模板像素逐通道比较。<code>sim</code> 的离散附加容差如下，容差与 <code>delta_color</code> 相加：</p>
+<table>
+<tr><th>sim</th><th>每个 RGB 通道附加容差</th></tr>
+<tr><td>0.5</td><td>49</td></tr><tr><td>0.6</td><td>38</td></tr><tr><td>0.7</td><td>29</td></tr><tr><td>0.8</td><td>18</td></tr><tr><td>0.9</td><td>9</td></tr><tr><td>其他合法值（含 1.0）</td><td>0</td></tr>
+</table>
+
+<h2>扫描方向</h2>
+<table>
+<tr><th>dir</th><th>起始角与扫描顺序</th></tr>
+<tr><td>0</td><td>从左到右、从上到下。</td></tr><tr><td>1</td><td>从左到右、从下到上。</td></tr>
+<tr><td>2</td><td>从右到左、从上到下。</td></tr><tr><td>3</td><td>从右到左、从下到上。</td></tr>
+</table>
+
+<h2>返回值与资源</h2>
+<p>返回独立的 <code>FsTongyongJieguo</code>。先判断指针是否为空，再检查 <code>status</code>；仅当 <code>status == FS_CHENGGONG</code> 时，<code>count == 0</code> 才表示正常无命中。命中条目提供模板列表索引 <code>id</code>、模板左上角坐标 <code>x/y</code> 和模板名称 <code>file</code>。用完必须调用 <code>FreeResult(result)</code>，不得直接释放结构或其内部指针。详见<a href="Jieguo.html">结果说明</a>。</p>
+
+<h2 id="findpic">FindPic 示例</h2>
+<pre><code>FindPic(0, 0, 834, 419, "test.bmp|test1.bmp", "000000", 0.9, 0)</code></pre>
+<p>按模板列表顺序优先；每项无法加载时跳过并保留原索引。若所有模板都无法加载，状态为 <code>FS_JIAZAI_SHIBAI</code>（9）。找到有效模板但没有命中则是 <code>status=0, count=0</code>。</p>
+
+<h2 id="findpics">FindPicS</h2>
+<pre><code>FindPicS(0, 0, 834, 419, "test.bmp|test1.bmp", "000000", 0.9, 0)</code></pre>
+<p>返回规则和字段布局与 FindPic 相同；每个结果仍用 <code>items[i].id/x/y/file</code> 读取。</p>
+
+<h2 id="findpicex">FindPicEx</h2>
+<pre><code>FindPicEx(0, 0, 834, 419, "test.bmp|test1.bmp", "000000", 0.9, 0)</code></pre>
+<p>最多返回 1500 项。按输入模板顺序依次列出每张模板的所有命中；保留重叠位置以及不同模板产生的重复位置。</p>
+
+<h2 id="findpicexs">FindPicExS</h2>
+<pre><code>FindPicExS(0, 0, 834, 419, "test.bmp|test1.bmp", "000000", 0.9, 0)</code></pre>
+<p>与 FindPicEx 一样返回最多 1500 个匹配条目；每项包含 <code>id</code>、<code>x</code>、<code>y</code>、<code>file</code>。</p>
+
+<div class="note">本页行为说明依据本项目 <code>ZhaoTu\ZhaoTu.h</code> 与《函数使用说明》。如需精确 C/C++ 类型定义，包含发布目录里的 <code>FsDmJiekou.h</code>。</div>
+</body>
+</html>

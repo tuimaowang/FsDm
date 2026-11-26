@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>FreeAllResults - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="freeallresults">FreeAllResults</h1>
+<p><strong>函数简介：</strong> 释放 22 个通用识别函数及 2 个文字数组函数在所有线程中尚未释放的结果。与 <code>FreeAllStringResults()</code> 功能、释放范围及返回规则完全相同，建议统一使用本函数；一次清理只调用其中一个即可。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI FreeAllResults(void);
+</code></pre>
+<p><strong>参数定义：</strong> 无。</p>
+<p><strong>返回值：</strong> 1 成功；无结果、重复调用也成功；0 失败。</p>
+<p><strong>示例：</strong></p>
+<pre><code>
+FreeAllResults()
+</code></pre>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#template">FreeAllResults 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

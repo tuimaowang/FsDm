@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>AcquireGpuFrame - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="acquiregpuframe">AcquireGpuFrame</h1>
+<p><strong>函数简介：</strong></p>
+<p>获取最新 GPU 共享纹理的只读租约，持有期间纹理不会被采集端覆盖。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI AcquireGpuFrame(FsGpuZhen* frame);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>frame：FsGpuZhen 输出结构指针；调用前设置 size=sizeof(FsGpuZhen)。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>0：取得可读资源，生产方 GPU 复制已完成。</li>
+<li>其他状态码：未绑定、等待首帧、资源忙、GPU 等待超时等。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+// C++ 调用；工作台不支持此结构体接口。
+FsGpuZhen g{};
+g.size = sizeof(g);
+if (AcquireGpuFrame(&amp;g) == FS_CHENGGONG) {
+    // 同进程、同适配器 D3D11 设备打开 g.sharedHandle。
+    // 只读使用，并确认调用方 GPU 操作完成。
+    ReleaseGpuFrame(g.token);
+}
+</code></pre>
+<p><strong>注意：</strong> sharedHandle 是旧式 DXGI 共享句柄，禁止 CloseHandle。纹理格式不保证 BGRA，按 textureFormat 处理，flip=1 表示上下翻转。等待上限 2 秒；资源池最多三个槽位，租约请求最多 64 个。</p>
+
+</body></html>

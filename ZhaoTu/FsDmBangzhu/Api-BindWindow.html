@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>BindWindow - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="bindwindow">BindWindow</h1>
+<p><strong>函数简介：</strong></p>
+<p>绑定本进程的指定窗口，同时选择采集方式；绑定成功后才开始采集。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI BindWindow(HWND hwnd, const char* display, const char* mouse, const char* keypad, int mode);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>hwnd：本进程的有效窗口句柄；x64 不得截断成 32 位。</li>
+<li>display：&quot;dx&quot;、&quot;obs&quot; 或 &quot;wgc&quot;，直接选择对应采集方式，区分大小写。当前不支持 &quot;gdi&quot;、&quot;gdi2&quot;、&quot;normal&quot;、&quot;dx2&quot;。</li>
+<li>mouse：接受 &quot;normal&quot;、&quot;windows&quot; 或 &quot;dx&quot;；当前仅校验并保存该配置，不执行鼠标操作，建议填写 &quot;normal&quot;。</li>
+<li>keypad：接受 &quot;normal&quot;、&quot;windows&quot; 或 &quot;dx&quot;；当前仅校验并保存该配置，不执行键盘操作，建议填写 &quot;normal&quot;。</li>
+<li>mode：0 或 1。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：绑定成功，可能仍在等待首帧。</li>
+<li>0：绑定失败。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+BindWindow(0x实际窗口句柄, &quot;dx&quot;, &quot;normal&quot;, &quot;normal&quot;, 0)
+UnBindWindow()
+BindWindow(0x实际窗口句柄, &quot;wgc&quot;, &quot;normal&quot;, &quot;normal&quot;, 0)
+UnBindWindow()
+BindWindow(0x实际窗口句柄, &quot;obs&quot;, &quot;normal&quot;, &quot;normal&quot;, 0)
+</code></pre>
+<p><strong>注意：</strong> 同进程只保留一个绑定。相同参数重复绑定成功；改变参数（包括采集方式）须先解绑。失败绑定不改变原绑定及其采集方式。最多等待初始化 7 秒，不等待首帧。绑定线程退出或窗口销毁会自动解绑。mouse 和 keypad 目前只作为配置值校验、保存并参与重复绑定比较，不实现鼠标或键盘操作；实际调用建议均填写 &quot;normal&quot;。其中 &quot;dx&quot; 只是可接受的字符串，不代表已实现 DX 鼠标或键盘模式。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#binding">BindWindow 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

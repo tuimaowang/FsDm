@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>MatchPicName - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="matchpicname">MatchPicName</h1>
+<p><strong>函数简介：</strong> 根据文件名和通配符获取 BMP、PNG、JPG/JPEG 文件集合，结果可直接传给 <code>FindPic/FindPicEx</code> 等。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+const char* WINAPI MatchPicName(const char* pic_name);
+</code></pre>
+<p><strong>参数定义：</strong> <code>pic_name</code> 为 UTF-8 文件名或路径，支持 <code>|</code> 列表、文件名中的 <code>*</code>、<code>?</code>。 相对路径按 <code>SetPath</code> 解析，未设定时按进程当前目录。通配符不能用于目录部分，不递归子目录。</p>
+<p><strong>返回值：</strong> 匹配到的 BMP、PNG、JPG/JPEG 文件名以 <code>|</code> 分隔，无匹配或错误返回空字符串。 不包含目录、其他扩展名、磁盘上不存在的文件或仅由 <code>LoadPicByte</code> 加载的虚拟模板。 每组匹配按文件名排序，整个列表按输入组顺序拼接，重复文件只保留第一次。 返回名称保留输入的相对目录或绝对路径形式；字符串属于 DLL，后续调用不会覆盖；使用完后调用 FreeAllResults 或 FreeAllStringResults 全量释放。</p>
+<p><strong>示例：</strong></p>
+<pre><code>
+SetPath(&quot;C:\Users\Administrator\Documents\DaMo\FsDm&quot;)
+MatchPicName(&quot;abc???.bmp|icon*.png|photo*.jpg&quot;)
+</code></pre>
+<p>假设目录内有 <code>abc001.bmp</code>、<code>abc002.bmp</code>，<code>MatchPicName(&quot;abc*.bmp&quot;)</code> 返回 <code>abc001.bmp|abc002.bmp</code>。</p>
+<p><strong>注意：</strong> 只枚举 BMP、PNG、JPG/JPEG 扩展名（不区分大小写），不会解码验证文件内容。BMP 找图模板仍要求有效 BMP24；PNG/JPG/JPEG 必须能由系统图像解码器解码。无需绑定窗口，不预加载模板，不创建 GPU 设备。工作台显示文件枚举和其他耗时。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#template">MatchPicName 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

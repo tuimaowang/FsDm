@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>AiYoloSortsObjects - FsDm 函数用法</title><style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}
+h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}
+h2{font-size:19px;color:#176a70;margin-top:28px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+table{border-collapse:collapse;width:100%;margin:10px 0}
+th,td{border:1px solid #d6e0e4;padding:7px 10px;text-align:left;vertical-align:top}th{background:#eaf2f2}
+</style></head><body>
+<p><a href="AiJiance.html">YOLO 接口总览</a> · <a href="WanZhengDiaoyong.html#yolo">工作台完整调用</a></p>
+<h1 id="aiyolosortsobjects">AiYoloSortsObjects</h1>
+<h2>函数简介</h2><p>对检测字符串中的目标按分行规则和横坐标重新排序，保留每个目标原有字段。</p>
+<h2>函数原型</h2><pre><code>const char* WINAPI AiYoloSortsObjects(const char* objects, int height);</code></pre>
+<h2>参数定义</h2><table>
+<tr><th>参数</th><th>含义</th></tr>
+<tr><td><code>objects</code></td><td>检测字符串，格式为 &quot;类别编号,置信度,x,y,w,h|...&quot;，可以传入 AiYoloDetectObjects 的结果。空字符串表示空列表。</td></tr>
+<tr><td><code>height</code></td><td>非负整数，单位为客户区像素。大于 0 时，先按 y、x 排序，以当前行首个目标的 y 为基准，后续目标与基准 y 的差达到 height 时另起一行，各行内部按 x 升序排列。传 0 时将全部目标作为一行，最终按 x 升序排列。</td></tr>
+</table>
+<h2>返回值与结果处理</h2><ul>
+<li>成功时返回重新排序后的独立字符串，各项字段保留原始文本。</li>
+<li>输入为空列表或解析失败时返回空字符串，分配失败可能返回 nullptr。此函数没有更新 GetOcrError 的诊断信息。</li>
+<li>返回值为 DLL 分配的独立 UTF-8 字符串，分配失败可能返回 nullptr。使用完后调用 FreeAllStringResults() 或 FreeAllResults()。全量释放会同时回收其他线程持有的字符串和通用结果，调用前须完成所有结果读取。工作台会自动显示并释放本次字符串结果。</li>
+</ul>
+<h2>作用范围与调用说明</h2><ul>
+<li>这是检测结果的排序接口，可直接处理已取得的字符串。</li>
+<li>height=0 的实际结果为全部目标按 x 排序。同一 x 的条目保持前面 y、x 预排序产生的先后顺序。</li>
+<li>输入末尾须紧跟最后一个目标字段，尾部多余的 | 会使解析失败。</li>
+</ul>
+<h2>完整 C++ 调用示例</h2>
+<p>路径使用本项目 Release 目录附带的 FP32 模型，按实际文件位置和窗口区域调整。本例独占绑定和全量结果释放时机，调用方须在目标窗口所属进程中运行。</p>
+<pre class="cpp"><code>#include &quot;FsDmJiekou.h&quot;
+#include &lt;cstdio&gt;
+
+// 在目标窗口所属进程调用，hwnd 为实际窗口句柄。
+// 包含 FsDmJiekou.h，链接 ZhaoTu.lib，并部署配套 DLL 与模型。
+bool CeshiAiYoloSortsObjects(HWND hwnd) {
+    if (!AiYoloSetVersion(&quot;v5-7.0&quot;)) return false;
+    if (!AiYoloSetModel(0, R&quot;(C:\Users\Administrator\Documents\DaMo\FsDm\out\build\bin\Release\YoloMoxing\yolov5n.onnx)&quot;, &quot;&quot;)) {
+        std::printf(&quot;%s\n&quot;, GetOcrError());
+        FreeAllStringResults();
+        return false;
+    }
+    if (!AiYoloUseModel(0)) {
+        AiYoloFreeModel(0);
+        return false;
+    }
+    if (!BindWindow(hwnd, &quot;dx&quot;, &quot;normal&quot;, &quot;normal&quot;, 0)) {
+        AiYoloFreeModel(0);
+        return false;
+    }
+    // 绑定成功后等待首张可用快照，最多约一秒。
+    bool ready = false;
+    for (int attempt = 0; attempt &lt; 100; ++attempt) {
+        FsZhuangtai state{};
+        state.size = sizeof(state);
+        if (GetStatus(&amp;state) == FS_CHENGGONG &amp;&amp; state.result == FS_CHENGGONG
+            &amp;&amp; state.bound &amp;&amp; state.hasFrame) {
+            ready = true;
+            break;
+        }
+        Sleep(10);
+    }
+    bool ok = false;
+    if (ready) {
+        const char* objects = AiYoloDetectObjects(0, 0, 834, 419, 0.5, 0.45);
+        // 立即读取本线程检测诊断，避免后续调用覆盖诊断。
+        const char* error = GetOcrError();
+        if (objects &amp;&amp; error &amp;&amp; *error == &#x27;\0&#x27;) {
+            const char* sorted = AiYoloSortsObjects(objects, 20);
+            if (sorted) {
+                std::printf(&quot;sorted=%s\n&quot;, sorted);
+                ok = (*objects == &#x27;\0&#x27;) || (*sorted != &#x27;\0&#x27;);
+            }
+        } else {
+            std::printf(&quot;%s\n&quot;, error ? error : &quot;结果内存分配失败&quot;);
+        }
+    }
+    // 本例全部结果读取结束后统一释放。
+    FreeAllStringResults();
+    UnBindWindow();
+    const bool freed = AiYoloFreeModel(0) == 1;
+    return ok &amp;&amp; freed;
+}</code></pre>
+<p><a href="WanZhengDiaoyong.html#yolo">工作台逐行输入示例、返回值检查和模型要求</a>。</p>
+</body></html>

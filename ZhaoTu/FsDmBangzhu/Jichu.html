@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>绑定、路径与截图函数</title>
+<style>
+body{font:15px/1.7 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}
+h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}
+h2{font-size:20px;color:#176a70;margin-top:30px}
+h3{font-size:16px;margin:18px 0 6px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap}
+code{font-family:Consolas,"Microsoft YaHei UI",monospace}
+ul{padding-left:24px}
+</style>
+</head>
+<body>
+<h1>绑定、路径与截图函数</h1>
+
+<h2 id="bindwindow">BindWindow</h2>
+<h3>函数简介</h3>
+<p>绑定当前进程的窗口并开始采集画面。</p>
+<h3>函数原型</h3>
+<pre><code>int WINAPI BindWindow(HWND hwnd, const char* display, const char* mouse, const char* keypad, int mode);</code></pre>
+<h3>参数定义</h3>
+<ul>
+<li>hwnd：当前进程的有效窗口句柄。</li>
+<li>display：采集方式，填写 "dx"、"obs" 或 "wgc"。</li>
+<li>mouse：接受 "normal"、"windows" 或 "dx"；当前仅校验并保存配置，不执行鼠标操作，建议填写 "normal"。</li>
+<li>keypad：接受 "normal"、"windows" 或 "dx"；当前仅校验并保存配置，不执行键盘操作，建议填写 "normal"。</li>
+<li>mode：模式参数，填写 0 或 1。</li>
+</ul>
+<h3>返回值</h3>
+<p>整型数：1 表示成功，0 表示失败。</p>
+<h3>示例</h3>
+<pre><code>BindWindow(0x实际窗口句柄, "dx", "normal", "normal", 0)</code></pre>
+<p>mouse 和 keypad 目前仅作为配置值校验、保存并参与重复绑定比较，不实现鼠标或键盘操作；"dx" 只是可接受的字符串，不代表已实现 DX 鼠标或键盘模式。实际调用建议均填写 "normal"。</p>
+
+<h2 id="unbindwindow">UnBindWindow</h2>
+<h3>函数简介</h3>
+<p>解除当前窗口绑定并停止采集。</p>
+<h3>函数原型</h3>
+<pre><code>int WINAPI UnBindWindow(void);</code></pre>
+<h3>参数定义</h3>
+<p>无。</p>
+<h3>返回值</h3>
+<p>整型数：1 表示成功，0 表示失败；重复解绑也返回成功。</p>
+<h3>示例</h3>
+<pre><code>UnBindWindow()</code></pre>
+
+<p><a href="Api-SetCaptureFrameInterval.html">SetCaptureFrameInterval</a></p>
+<h2 id="setpath">SetPath</h2>
+<h3>函数简介</h3>
+<p>设置截图文件和图片模板相对路径所使用的目录。</p>
+<h3>函数原型</h3>
+<pre><code>int WINAPI SetPath(const char* path);</code></pre>
+<h3>参数定义</h3>
+<ul><li>path：已存在的目录路径，字符串使用 UTF-8。</li></ul>
+<h3>返回值</h3>
+<p>整型数：1 表示设置成功，0 表示路径无效或设置失败。</p>
+<h3>示例</h3>
+<pre><code>SetPath("C:\\Users\\Administrator\\Documents\\DaMo\\FsDm")</code></pre>
+
+<h2 id="setfindbackend">SetFindBackend</h2>
+<h3>函数简介</h3>
+<p>选择找图、找色和取色使用 CPU 或 GPU 执行。</p>
+<h3>函数原型</h3>
+<pre><code>int WINAPI SetFindBackend(const char* backend);</code></pre>
+<h3>参数定义</h3>
+<ul><li>backend：填写 "cpu" 或 "gpu"。</li></ul>
+<h3>返回值</h3>
+<p>整型数：1 表示设置成功，0 表示参数错误。</p>
+<h3>示例</h3>
+<pre><code>SetFindBackend("gpu")</code></pre>
+
+<h2 id="capture">Capture</h2>
+<h3>函数简介</h3>
+<p>抓取指定区域，可登记为找图模板、保存为 24 位 BMP 位图，或同时执行。</p>
+<h3>函数原型</h3>
+<pre><code>int WINAPI Capture(int x1, int y1, int x2, int y2, const char* name, int mode = 2);</code></pre>
+<h3>参数定义</h3>
+<ul>
+<li>x1：区域左上角 X 坐标。</li>
+<li>y1：区域左上角 Y 坐标。</li>
+<li>x2：区域右下角 X 坐标。</li>
+<li>y2：区域右下角 Y 坐标；右下边界不包含在截图内。</li>
+<li>name：mode=1 时为模板别名；mode=2 时为文件路径；mode=3 时同时作为模板别名和文件路径。</li>
+<li>mode：1 仅登记模板，2 仅保存文件，3 同时执行。C++ 和工作台可省略，默认 2；C 或动态调用必须传入 6 个参数。</li>
+</ul>
+<h3>返回值</h3>
+<p>整型数：0 表示失败，1 表示成功。</p>
+<h3>示例</h3>
+<pre><code>Capture(0, 0, 2000, 2000, "screen.bmp")</code></pre>
+<p>mode=1 登记原始截图像素，可直接用 name 调用 FindPic，并由 FreePic 释放。mode=3 若写入文件后模板缓存不足，会返回 0，但不会回滚已保存文件。</p>
+
+<h2 id="capturejpg">CaptureJpg</h2>
+<h3>函数简介</h3>
+<p>抓取指定区域并保存为 JPEG 图片。</p>
+<h3>函数原型</h3>
+<pre><code>int WINAPI CaptureJpg(int x1, int y1, int x2, int y2, const char* name, int mode = 2);</code></pre>
+<h3>参数定义</h3>
+<ul><li>x1、y1：区域左上角坐标。</li><li>x2、y2：区域右下角坐标，右下边界不包含。</li><li>name：模板别名和/或文件路径，具体由 mode 决定。</li><li>mode：1 仅登记模板，2 仅保存文件，3 同时执行。C++ 和工作台可省略，默认 2；C 或动态调用必须传入 6 个参数。</li></ul>
+<h3>返回值</h3>
+<p>整型数：0 表示失败，1 表示成功。</p>
+<h3>示例</h3>
+<pre><code>CaptureJpg(0, 0, 2000, 2000, "screen.jpg")</code></pre>
+
+<h2 id="capturepng">CapturePng</h2>
+<h3>函数简介</h3>
+<p>抓取指定区域并保存为 PNG 图片。</p>
+<h3>函数原型</h3>
+<pre><code>int WINAPI CapturePng(int x1, int y1, int x2, int y2, const char* name, int mode = 2);</code></pre>
+<h3>参数定义</h3>
+<ul><li>x1、y1：区域左上角坐标。</li><li>x2、y2：区域右下角坐标，右下边界不包含。</li><li>name：模板别名和/或文件路径，具体由 mode 决定。</li><li>mode：1 仅登记模板，2 仅保存文件，3 同时执行。C++ 和工作台可省略，默认 2；C 或动态调用必须传入 6 个参数。</li></ul>
+<h3>返回值</h3>
+<p>整型数：0 表示失败，1 表示成功。</p>
+<h3>示例</h3>
+<pre><code>CapturePng(0, 0, 2000, 2000, "screen.png")</code></pre>
+
+<h2 id="capturegif">CaptureGif</h2>
+<h3>函数简介</h3>
+<p>抓取指定区域并保存为动态 GIF 或单帧 GIF。</p>
+<h3>函数原型</h3>
+<pre><code>int WINAPI CaptureGif(int x1, int y1, int x2, int y2, const char* file, int delay, int time);</code></pre>
+<h3>参数定义</h3>
+<ul>
+<li>x1、y1：区域左上角坐标。</li>
+<li>x2、y2：区域右下角坐标，右下边界不包含。</li>
+<li>file：GIF 文件名或完整路径。</li>
+<li>delay：帧间隔，单位为毫秒；0 表示保存单帧。</li>
+<li>time：录制时长，单位为毫秒；保存单帧时填写 0。</li>
+</ul>
+<h3>返回值</h3>
+<p>整型数：0 表示失败，1 表示成功。</p>
+<h3>示例</h3>
+<pre><code>CaptureGif(0, 0, 2000, 2000, "screen.gif", 100, 3000)
+CaptureGif(0, 0, 2000, 2000, "still.gif", 0, 0)</code></pre>
+</body>
+</html>

@@ -1,0 +1,47 @@
+// 只复制每行 // 前的命令；句柄和区域按实际窗口修改，下面使用上次的 834×419。
+// 完整流程见 QuanHanshuCeshi.md；统一结果由工作台显示后自动释放。
+log 0
+SetPath("C:\Users\Administrator\Documents\DaMo\FsDm")
+UnBindWindow()
+BindWindow(0x8912EC, "dx", "normal", "normal", 0)
+status
+// 等 status 显示绑定=1、GPU已缓存再继续；DX 无画面时先解绑，再用 wgc 绑定。
+Capture(0, 0, 834, 419, "ceshi_ocr.bmp", 2) // 返回 1 后再执行后面的文件识别。
+SetOcrEngine("model")
+SetOcrBackend("cpu")
+Ocr(0, 0, 834, 419, "", 0.5) // fullText 提供全文，items 提供字符坐标；首次包含加载。
+Ocr(0, 0, 834, 419, "", 0.5) // 再测一次，复用模型。
+OcrEx(0, 0, 834, 419, "", 0.5) // 全文及字符 id、x、y、text 数组。
+OcrExOne(0, 0, 834, 419, "", 0.5) // fullText 提供全文，items 提供字符和坐标。
+FindStr(0, 0, 834, 419, "开始游戏|确定", "", 0.5) // 目标文字自行替换；条目提供 id、x、y、text；count=0 未命中，非零 status 为错误。
+FindStrS(0, 0, 834, 419, "开始游戏|确定", "", 0.5) // 显示一个 id、x、y、text 条目。
+FindStrEx(0, 0, 834, 419, "开始游戏|确定", "", 0.5) // 逐项显示 id、x、y、text。
+FindStrExS(0, 0, 834, 419, "开始游戏|确定", "", 0.5) // 逐项显示 id、x、y、text。
+FindStrFast(0, 0, 834, 419, "开始游戏|确定", "", 0.5) // 快速找字；显示一个 id、x、y、text 条目。
+FindStrFastS(0, 0, 834, 419, "开始游戏|确定", "", 0.5) // 显示一个 id、x、y、text 条目。
+FindStrFastEx(0, 0, 834, 419, "开始游戏|确定", "", 0.5) // 逐项显示 id、x、y、text。
+FindStrFastExS(0, 0, 834, 419, "开始游戏|确定", "", 0.5) // 逐项显示 id、x、y、text。
+SetOcrBackend("directml")
+Ocr(0, 0, 834, 419, "", 0.5) // 首次 GPU 推理可能较慢。
+Ocr(0, 0, 834, 419, "", 0.5) // 复用 DirectML 设备和会话。
+status
+GetOcrError() // 空字符串表示当前线程最近 OCR 操作没有错误。
+FreeAllResults() // 若外部程序也保留结果，须等它读取结束后执行。
+UnBindWindow()
+
+// 文件识别无需绑定；先把图片路径和尺寸改为实际值。
+OcrInFile(0, 0, 834, 419, "ceshi_ocr.bmp", "", 0.5)
+SetOcrBackend("cpu")
+// status=0/count>0 有识别条目；status=0/count=0 无命中；非零 status 是错误，执行 GetOcrError()。
+// 外部调用使用 FsDmJiekou.h 的真实返回类型，读取 fullText、count、items 后调用 FreeResult。
+
+// 可选：字库只支持 README 所列未加密11位列点阵格式，需要真实兼容字库。
+// SetDict(0, "C:\字库目录\ziku.txt")
+// UseDict(0)
+// GetNowDict()
+// GetDictCount(0)
+// SetOcrEngine("dict")
+// 重新 BindWindow 后，使用 Ocr/FindStr 系列并填写文字颜色；字库精确匹配推荐 1.0。
+// FindStrFast(0, 0, 834, 419, "长安|洛阳", "9f2e3f-000000", 1.0)
+// ClearDict(0)
+// SetOcrEngine("model")

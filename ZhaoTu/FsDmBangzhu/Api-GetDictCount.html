@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>GetDictCount - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="getdictcount">GetDictCount</h1>
+<p><strong>函数简介：</strong></p>
+<p>获取指定字库中已加载的字形条目数量。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI GetDictCount(int index);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>index：字库编号，0～99。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>大于或等于 0：字形条目数；未加载时为 0。</li>
+<li>编号无效也返回 0，可通过 GetOcrError 区分。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+GetDictCount(0)
+</code></pre>
+<p><strong>注意：</strong> 计数字形条目，不一定等于去重后的字符数量。当前单个字库最多 10000 个字形。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-dict">GetDictCount 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

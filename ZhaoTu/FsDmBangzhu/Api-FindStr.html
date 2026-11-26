@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>FindStr - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="findstr">FindStr</h1>
+<p><strong>函数简介：</strong></p>
+<p>查找目标文字的第一个位置。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+const FsTongyongJieguo* WINAPI FindStr(int x1, int y1, int x2, int y2, const char* text, const char* color_format, double sim);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>x1、y1：区域左上角坐标。</li>
+<li>x2、y2：区域右下角坐标，不包含右下边界；窗口接口使用客户区物理像素。</li>
+<li>text：待查文字，多个目标用 | 分隔，例如 &quot;开始游戏|确定&quot;；按列表优先，不跨行匹配。</li>
+<li>color_format：文字颜色过滤规则，同 Ocr；模型通常使用 &quot;&quot;。</li>
+<li>sim：范围 0.1～1.0；含义同 Ocr，与找图找色的离散容差不同。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>返回独立的 <code>FsTongyongJieguo</code> 指针。<code>status=0</code> 正常，<code>count=0</code> 无命中；错误为非 0 状态，分配失败为 <code>nullptr</code>。</li>
+<li>条目提供目标索引 id、首字符坐标 x/y 和命中文字 text。最多 1 项。</li>
+<li>条目有效字段标志：<code>FS_JG_ID | FS_JG_XY | FS_JG_TEXT</code>；用完后通过 DLL 释放。fullText 为空字符串。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+FindStr(0, 0, 834, 419, &quot;开始游戏|确定&quot;, &quot;&quot;, 0.5)
+</code></pre>
+<p><strong>注意：</strong> 目标列表优先，不跨行拼接；x/y 为命中文字首字符的位置，id 为目标索引，text 为命中的目标文字。模型坐标为估计值。S 与非 S 版本使用相同的结果布局。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-dict">FindStr 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

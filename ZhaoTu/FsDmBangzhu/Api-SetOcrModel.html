@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>SetOcrModel - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="setocrmodel">SetOcrModel</h1>
+<p><strong>函数简介：</strong></p>
+<p>登记一个 OCR 模型目录并校验必要资源。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI SetOcrModel(int index, const char* model_dir);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>index：模型编号，0～99。</li>
+<li>model_dir：UTF-8 模型目录；支持项目默认 PP-OCRv5 mobile，以及 PP-OCRv3 中文 models 或 models10 文件布局。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：登记成功。</li>
+<li>0：编号、路径、配置或模型资源无效。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+SetOcrModel(1, &quot;C:\模型目录&quot;)
+</code></pre>
+<p><strong>注意：</strong> PP-OCRv3 当前使用中文识别模型和方向分类模型，英文专用识别模型不参与推理。登记不自动选中，随后 UseOcrModel(1)。实际推理会话在首次识别时创建；相同规范目录重复登记复用会话。不是任意 ONNX 模型都兼容。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#ocr-model">SetOcrModel 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>FsOcrZhuangtai 结构说明</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:28px 36px;max-width:1000px}
+h1{font-size:26px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}
+table{border-collapse:collapse;width:100%;margin:12px 0}
+th,td{border:1px solid #d6e0e4;padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eaf2f2}
+</style>
+</head>
+<body>
+<p>FsDm 帮助 &gt; 结构体 &gt; FsOcrZhuangtai</p>
+<h1>FsOcrZhuangtai</h1>
+<p><code>FsOcrZhuangtai</code> 是 <code>GetOcrStatus</code> 通过参数返回的 OCR 状态结构，用于报告当前线程最近一次 OCR 的后端、引擎、阶段耗时和诊断信息。结构大小为 624 字节。</p>
+<table>
+<tr><th>字段</th><th>含义</th></tr>
+<tr><td><code>size</code>、<code>version</code></td><td>结构字节数与布局版本。</td></tr>
+<tr><td><code>backend</code></td><td>OCR 后端：0=CPU，1=DirectML。</td></tr>
+<tr><td><code>engine</code></td><td>OCR 引擎：0=神经网络模型，1=点阵字库。</td></tr>
+<tr><td><code>modelIndex</code>、<code>dictIndex</code></td><td>当前选择的模型、字库序号。</td></tr>
+<tr><td><code>result</code></td><td>当前线程最近一次 OCR 诊断状态，取 <code>FsJieguo</code>。</td></tr>
+<tr><td><code>loadedSessions</code></td><td>当前已加载的模型推理会话数，不等于登记模型数量。</td></tr>
+<tr><td><code>sessionsCreated</code>、<code>devicesCreated</code></td><td>累计创建的推理会话数和 DirectML 设备数。</td></tr>
+<tr><td><code>frameNumber</code>、<code>bindingVersion</code></td><td>窗口 OCR 所用快照及绑定版本；文件 OCR 时不代表窗口画面。</td></tr>
+<tr><td><code>initializationMs</code>、<code>acquireMs</code>、<code>preprocessMs</code></td><td>初始化、采集取帧、图像预处理耗时，单位毫秒。</td></tr>
+<tr><td><code>detectionMs</code>、<code>recognitionMs</code>、<code>resultMs</code></td><td>文字检测、文字识别、结果整理耗时，单位毫秒。</td></tr>
+<tr><td><code>message</code></td><td>当前线程的 UTF-8 诊断信息，结构内固定数组，无须单独释放。</td></tr>
+</table>
+<p>相关函数：<a href="Api-GetOcrStatus.html#getocrstatus">GetOcrStatus</a>。</p>
+</body>
+</html>

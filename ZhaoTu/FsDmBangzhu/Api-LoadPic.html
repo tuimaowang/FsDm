@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>LoadPic - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="loadpic">LoadPic</h1>
+<p><strong>函数简介：</strong></p>
+<p>预先加载 BMP24、PNG 或 JPG/JPEG 文件模板到内存，供后续找图直接复用。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI LoadPic(const char* pic_name);
+</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>pic_name：BMP24、PNG 或 JPG/JPEG 模板名称，支持 | 列表及文件名中的 *、? 通配符；目录部分不支持通配符。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：全部指定模板加载成功。</li>
+<li>0：至少有一项失败；此前已成功加载的项仍保留。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>
+LoadPic(&quot;test.bmp|icon.png|photo.jpg&quot;)
+</code></pre>
+<p><strong>注意：</strong> 无需绑定。显式缓存不自动淘汰，模板数量按需增长，并受 <a href="#settemplatecachelimit"><code>SetTemplateCacheLimit</code></a> 设置的 CPU 字节预算约束。默认预算为 256 MiB。加载后不再检查源文件；要更新请 FreePic 后重新加载。GPU 模板首次查找时按需上传，并受每个 GPU 设备各自的同值预算约束。</p>
+<h2 id="settemplatecachelimit">SetTemplateCacheLimit</h2>
+<p><strong>函数简介：</strong></p>
+<p>设置找图模板缓存的字节预算。模板数量没有固定上限，但仍受缓存预算和可用内存、显存约束。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>int WINAPI SetTemplateCacheLimit(uint64_t bytes);</code></pre>
+<p><strong>参数定义：</strong></p>
+<ul>
+<li>bytes：大于 0 的字节数；默认值为 268435456（256 MiB）。</li>
+</ul>
+<p><strong>返回值：</strong></p>
+<ul>
+<li>1：设置成功。</li>
+<li>0：参数为 0、超出平台可表示范围，或新预算小于当前显式预加载模板的 CPU 占用；失败时保留原配置。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code>SetTemplateCacheLimit(536870912); // 512 MiB</code></pre>
+<p><strong>预算规则：</strong> CPU 缓存和每个 GPU 设备缓存分别使用该字节预算，不合并计算；它不是进程总内存上限。降低预算时会淘汰普通 CPU 缓存和 GPU 最近较少使用的模板。正在执行的查找继续使用其模板，相关资源在查找结束后回收。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#pic">LoadPic 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

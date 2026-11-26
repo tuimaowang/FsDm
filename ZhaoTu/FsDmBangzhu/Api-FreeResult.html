@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>FreeResult - FsDm 函数用法</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:26px 32px;max-width:1000px}h1{font-size:25px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:8px}h2{font-size:18px;color:#176a70;margin:24px 0 8px}p{margin:8px 0}pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-family:Consolas,"Microsoft YaHei UI",monospace}ul{padding-left:24px}table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #d6e0e4;padding:6px 12px;text-align:left}
+</style></head><body><h1 id="freeresult">FreeResult</h1>
+<p><strong>函数简介：</strong> 精确释放一个通用结果，连同条目数组及所有文字一起释放。</p>
+<p><strong>函数原型：</strong></p>
+<pre><code>
+int WINAPI FreeResult(const FsTongyongJieguo* result);
+</code></pre>
+<p><strong>参数定义：</strong> result 为某个通用识别函数本次返回的指针，不是 items 或 text 的地址。</p>
+<p><strong>返回值：</strong> 1 成功，nullptr 也成功；0 为未知地址或重复释放。</p>
+<p><strong>示例（C++）：</strong></p>
+<pre><code>
+const FsTongyongJieguo* a = GetColor(30, 30);
+const FsTongyongJieguo* b = GetColor(40, 40);
+if (a &amp;&amp; a-&gt;status == 0 &amp;&amp; a-&gt;count == 1) {
+    const uint32_t rgb = a-&gt;items[0].color;
+    const bool white = rgb == 0xffffffu;
+    (void)white;
+}
+FreeResult(a);
+FreeResult(b);
+</code></pre>
+<p>工作台自动释放自身的结果，无须手动 FreeResult。<code>FreeResult(0)</code> 可验证空指针成功；不要填写已自动释放的工作台结果地址。</p>
+
+<p><strong>完整调用实例：</strong>请参阅<a href="WanZhengDiaoyong.html#all-results">FreeResult 所属工作流</a>，其中包含前置设置、调用及结果/资源处理。</p>
+</body></html>

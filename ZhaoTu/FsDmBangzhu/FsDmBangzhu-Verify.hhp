@@ -1,0 +1,98 @@
+[OPTIONS]
+Compiled file=..\..\fsdm_verify.chm
+Contents file=Mulu.hhc
+Index file=Suoyin.hhk
+Default topic=Jichu.html
+Title=FsDm 函数用法
+Language=0x804
+Compatibility=1.1 or later
+Full-text search=Yes
+Display compile progress=No
+Default Window=FSDM
+
+[WINDOWS]
+FSDM="FsDm 函数用法","Mulu.hhc","Suoyin.hhk","Jichu.html","Jichu.html",,,,,0x23520,,0x387e,,,,,,,,0
+
+[FILES]
+Jichu.html
+Mubanguanli.html
+Zhaotu.html
+Api-BindWindow.html
+Api-UnBindWindow.html
+Api-SetCaptureFrameInterval.html
+Api-SetFrameResultCache.html
+Api-SetPath.html
+Api-SetFindBackend.html
+Api-GetFindStatus.html
+Api-Capture.html
+Api-CaptureJpg.html
+Api-CapturePng.html
+Api-CaptureGif.html
+Api-GetStatus.html
+Api-GetFrameNumber.html
+Api-GetCpuUsage.html
+Api-GetGpuUsage.html
+Api-IsDisplayDead.html
+Jiegouti.html
+Jiegouti-FsZhuangtai.html
+Jiegouti-FsChazhaoZhuangtai.html
+Jiegouti-FsOcrZhuangtai.html
+Jiegouti-FsTongyongJieguo.html
+Jiegouti-FsJieguoXiang.html
+Api-FreeResult.html
+Api-FreeAllResults.html
+Api-FreeAllStringResults.html
+Api-LoadPic.html
+Api-LoadPicByte.html
+Api-FreePic.html
+Api-MatchPicName.html
+Api-FindPic.html
+Api-FindPicS.html
+Api-FindPicEx.html
+Api-FindPicExS.html
+Api-GetColor.html
+Api-CmpColor.html
+Api-FindColor.html
+Api-FindColorEx.html
+Api-FindMultiColor.html
+Api-FindMultiColorEx.html
+Api-SetOcrModel.html
+Api-SetOcrModelFiles.html
+Api-UseOcrModel.html
+Api-FreeOcrModel.html
+Api-SetOcrBackend.html
+Api-SetOcrEngine.html
+Api-SetDict.html
+Api-SetDictMemory.html
+Api-UseDict.html
+Api-GetNowDict.html
+Api-GetDictCount.html
+Api-ClearDict.html
+Api-Ocr.html
+Api-OcrEx.html
+Api-OcrExOne.html
+Api-OcrInFile.html
+Api-FindStr.html
+Api-FindStrS.html
+Api-FindStrEx.html
+Api-FindStrExS.html
+Api-FindStrFast.html
+Api-FindStrFastS.html
+Api-FindStrFastEx.html
+Api-FindStrFastExS.html
+Api-GetOcrError.html
+Api-GetOcrStatus.html
+MubanPipei.html
+AiJiance.html
+Api-AiYoloSetVersion.html
+Api-AiYoloSetModel.html
+Api-AiYoloSetModelMemory.html
+Api-AiYoloUseModel.html
+Api-AiYoloFreeModel.html
+Api-AiYoloDetectObjects.html
+Api-AiYoloDetectObjectsToFile.html
+Api-AiYoloDetectObjectsToDataBmp.html
+Api-AiYoloSortsObjects.html
+Api-AiYoloObjectsToString.html
+Shouye.html
+WanZhengDiaoyong.html

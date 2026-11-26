@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>找图模板管理</title>
+<style>
+body{font:15px/1.75 "Microsoft YaHei UI","Microsoft YaHei",sans-serif;color:#202a34;margin:28px 36px;max-width:980px}
+h1{font-size:26px;color:#123f57;border-bottom:2px solid #27a28b;padding-bottom:10px}h2{font-size:20px;color:#176a70;margin-top:26px}
+pre{background:#f1f5f7;border-left:4px solid #27a28b;padding:14px;overflow:auto}code{font-family:Consolas,monospace}
+table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #d6e0e4;padding:8px 10px;text-align:left;vertical-align:top}th{background:#eaf2f2}.note{background:#fff7df;border-left:4px solid #d99a32;padding:10px 14px}
+</style>
+</head>
+<body>
+<p>FsDm 找图帮助 &gt; 模板管理</p>
+<h1>模板加载、枚举与释放</h1>
+<h2>路径规则</h2>
+<p><code>SetPath(const char* path)</code> 设置相对模板路径的基础目录。路径字符串使用 UTF-8。绝对路径不受影响；未设置时相对路径按宿主进程当前目录解析。该函数不会创建目录。</p>
+<pre><code>SetPath(R"(C:\Users\Administrator\Documents\DaMo\FsDm)");</code></pre>
+
+<h2 id="bmp24">模板格式</h2>
+<p>磁盘模板支持有效 BMP24、PNG、JPG/JPEG；模板按原始像素尺寸匹配，没有缩放功能。BMP24 四角颜色相同时，该颜色作为透明色忽略；PNG 完全透明像素不参与匹配，半透明像素按解码 RGB 比较；JPG/JPEG 按不透明图处理。LoadPicByte 仍只接受 BMP24。</p>
+
+<h2 id="cachelimit">SetTemplateCacheLimit：设置缓存预算</h2>
+<pre><code>int WINAPI SetTemplateCacheLimit(uint64_t bytes);</code></pre>
+<p>设置模板缓存字节预算，默认 256 MiB，参数必须大于 0。CPU 缓存和每个 GPU 设备缓存分别使用该预算，不合并计算。降低预算时，普通 CPU 模板和 GPU 最近较少使用的模板会被淘汰；当前查找仍在使用的资源会在查找结束后回收。若新预算小于已显式预加载模板的 CPU 占用，返回 0 且原配置不变。</p>
+<pre><code>SetTemplateCacheLimit(536870912); // 512 MiB</code></pre>
+
+<h2 id="loadpic">LoadPic：预加载磁盘模板</h2>
+<pre><code>int WINAPI LoadPic(const char* pic_name);</code></pre>
+<p>可以在找图前将一个或多个磁盘 BMP24、PNG、JPG/JPEG 模板预加载到内存。无需先绑定窗口。名称使用 UTF-8；支持以 <code>|</code> 分隔的列表和文件名中的 <code>*</code>、<code>?</code> 通配符，目录部分不支持通配符。</p>
+<pre><code>LoadPic("button.bmp|icons\\*.bmp");</code></pre>
+<p>全部模板加载成功返回 1；有任一项失败返回 0，但之前成功加载的项仍保留。显式缓存不会自动淘汰，模板数量按需增长，并受 <code>SetTemplateCacheLimit</code> 设置的 CPU 字节预算约束。加载后不再检查源文件；更新模板前先 FreePic，再重新加载。GPU 模板在首次查找时按需上传，并受每个 GPU 设备各自的同值预算约束。</p>
+
+<h2 id="loadpicbyte">LoadPicByte：从本进程内存加载</h2>
+<pre><code>int WINAPI LoadPicByte(uintptr_t addr, int size, const char* pic_name);</code></pre>
+<p>从本进程可读内存复制完整 BMP24 文件数据并登记为虚拟模板名称。<code>addr</code> 必须是完整 BMP 文件首地址而不是像素裸数据；<code>size</code> 包含文件头，不能超过当前模板缓存预算（默认 256 MiB）；<code>pic_name</code> 是单个名称，不接受列表和通配符。该接口仍不接受 PNG/JPG 编码数据。</p>
+<p>成功后 DLL 已复制并解码，原始内存可立即释放。x64 调用必须使用 <code>uintptr_t</code>，避免指针地址被截断。同名成功调用替换旧模板；失败时保留旧内容。成功返回 1，失败返回 0。</p>
+
+<h2 id="freepic">FreePic：释放模板缓存</h2>
+<pre><code>int WINAPI FreePic(const char* pic_name);</code></pre>
+<p>按模板名称释放 CPU 缓存及对应 GPU 模板缓存。支持 <code>|</code> 列表和文件名通配符；有效名称没有缓存时仍返回成功。此函数不会删除磁盘文件。</p>
+<pre><code>FreePic("button.bmp|memory.bmp");</code></pre>
+<p>已经开始的查找继续使用旧模板，该次查找结束后再释放；普通磁盘文件下次 FindPic 会自动加载。LoadPicByte 和 Capture mode=1/3 建立的内存别名需要重新加载或重新截图。</p>
+
+<h2 id="matchpicname">MatchPicName：枚举图片文件</h2>
+<pre><code>const char* WINAPI MatchPicName(const char* pic_name);</code></pre>
+<p>按 SetPath 枚举存在的 BMP、PNG、JPG/JPEG 文件，支持文件名中的 <code>*</code>、<code>?</code> 和多个以 <code>|</code> 分隔的条件，不需要绑定窗口。目录部分不支持通配符，不递归子目录。只根据扩展名枚举，不检查图片内容是否有效。</p>
+<pre><code>const char* names = MatchPicName("button*.bmp|icon?.bmp");
+// names 可能为 "button_a.bmp|button_b.bmp|icon1.bmp"
+// 使用完成后通过 FreeAllResults() 或 FreeAllStringResults() 回收。</code></pre>
+<p>每组名称排序、全局去重，并保留输入路径形式；无匹配或错误返回空字符串。返回字符串属于 DLL，不能自行释放。它与 FindPic 的结构化结果不同，不能传给 FreeResult。</p>
+</body>
+</html>
